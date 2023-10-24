@@ -4,7 +4,7 @@ from typing import Self, Tuple, List
 
 
 class Simulation:
-    def __init__(self, T: float, gamma: float, k: float, l_0: float,
+    def __init__(self, T: float, gamma: float, k: float, l_0: float, R: float, R_spring: float,
                  r: ndarray, r_spring: ndarray,
                  v: ndarray, v_spring: ndarray,
                  m: ndarray, m_spring: ndarray):
@@ -12,6 +12,8 @@ class Simulation:
         self._gamma = gamma
         self._k = k
         self._l_0 = l_0
+        self._R = R
+        self._R_spring = R_spring
         self._r = r
         self._r_spring = r_spring
         self._v = v
@@ -65,6 +67,22 @@ class Simulation:
     @l_0.setter
     def l_0(self, val: float):
         self._l_0 = val
+
+    @property
+    def R(self) -> float:
+        return self._R
+
+    @R.setter
+    def R(self, val: float):
+        self._R = val
+
+    @property
+    def R_spring(self) -> float:
+        return self._R_spring
+
+    @R_spring.setter
+    def R_spring(self, val: float):
+        self._R_spring = val
 
     @property
     def r(self) -> ndarray:

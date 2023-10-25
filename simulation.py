@@ -94,7 +94,7 @@ class Simulation:
 
     @property
     def v(self) -> ndarray:
-        return self.v
+        return self._v
 
     @property
     def v_spring(self) -> ndarray:
@@ -113,3 +113,53 @@ class Simulation:
 
     def calc_potential_energy(self) -> ndarray:
         return np.random.uniform(size=(self.r_spring.shape[1],))
+
+    @staticmethod
+    def get_deltad2_pairs(r, ids_pairs):
+        dx = torch.diff(torch.stack([r[0][ids_pairs[:, 0]], r[0][ids_pairs[:, 1]]]).T).squeeze()
+        dy = torch.diff(torch.stack([r[1][ids_pairs[:, 0]], r[1][ids_pairs[:, 1]]]).T).squeeze()
+        return dx ** 2 + dy ** 2
+
+    @staticmethod
+    def compute_new_v(v1, v2, r1, r2, m1, m2):
+        m_s = m1 + m2
+        dr = r1 - r2
+        dr_norm_sq = np.linalg.norm(dr, axis=0) ** 2
+
+        v1new = v1 - (np.sum((2 * m2 / m_s) * (v1 - v2) * dr, axis=0) * dr) / dr_norm_sq
+        v2new = v2 - (np.sum((2 * m1 / m_s) * (v2 - v1) * dr, axis=0) * dr) / dr_norm_sq
+
+        return v1new, v2new
+
+    def motion(self, id_pairs, dt, d_cutoff):
+        ic = id_pairs[self.get_deltad2_pairs(self.r, self._ids_pairs) < d_cutoff ** 2]  # _ids_pairs aren't created
+
+        self._v[:, ic[:, 0]], self._v[:, ic[:, 1]] = self.compute_new_v(
+            self._v[:, ic[:, 0]], self._v[:, ic[:, 1]],
+            self._r[:, ic[:, 0]], self._r[:, ic[:, 1]],
+            self._m[ic[:, 0]], self._m[ic[:, 1]]
+        )
+
+        dr = self.r_spring[:, 0] - self.r_spring[:, 1]
+        dr_sc = dr.norm()
+        f = dr * (self.k * (1 - self.l_0 / dr_sc))
+        self.v_spring[:, 0] -= f * (dt / self.m_spring[0])
+        self.v_spring[:, 1] += f * (dt / self.m_spring[1])
+
+        self._v[0, self._r[0] > 1] = -np.abs(self._v[0, self._r[0] > 1])
+        self._v[0, self._r[0] < 0] = np.abs(self._v[0, self._r[0] < 0])
+        self._v[1, self._r[1] > 1] = -np.abs(self._v[1, self._r[1] > 1])
+        self._v[1, self._r[1] < 0] = np.abs(self._v[1, self._r[1] < 0])
+
+        self._r = self._r + self._v * dt
+
+        return f
+
+
+# TODO:
+#   1) rewrite get_deltad2_pairs
+#   2) modify index colides (ic) for 2 types of particles
+#   3) think about data layout
+
+# video:
+# https://youtu.be/iSEAidM-DDI?si=TdfkNox4gglKLRd3

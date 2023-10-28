@@ -24,8 +24,16 @@ class Simulation:
         self._n_particles = r.shape[1]
         self._n_spring = r_spring.shape[1]
 
-        ids = np.arange(self._n_particles + self._n_spring)
-        self._ids_pairs = np.asarray(list(itertools.combinations(ids, 2)))
+        # ids = np.arange(self._n_particles + self._n_spring)
+        # self._ids_pairs = np.asarray(list(itertools.combinations(ids, 2)))
+
+        spring_ids = np.arange(self._n_spring)
+        self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))
+
+        particles_ids = np.arange(self._n_particles) + self._n_spring
+        self._particles_ids_pairs = np.asarray(list(itertools.combinations(particles_ids, 2)))
+
+        self._spring_particles_ids_paris = np.asarray(list(itertools.product(spring_ids, particles_ids)))
 
     def __iter__(self) -> Self:
         return self
@@ -144,7 +152,23 @@ class Simulation:
         return v1new, v2new
 
     def motion(self, dt):
-        ic = self._ids_pairs[self.get_deltad2_pairs(self._r, self._ids_pairs) < self.R ** 2]
+        # ic = self._ids_pairs[self.get_deltad2_pairs(self._r, self._ids_pairs) < self.R ** 2]
+
+        ic_spring = self._spring_ids_pairs[
+            np.asarray(self.get_deltad2_pairs(self._r, self._spring_ids_pairs)).reshape((1, ))
+            < (2 * self.R_spring) ** 2]
+
+        ic_particles = self._particles_ids_pairs[
+            self.get_deltad2_pairs(self._r, self._particles_ids_pairs) < (2 * self.R) ** 2]
+
+        ic_spring_particles = self._spring_particles_ids_paris[
+            self.get_deltad2_pairs(self._r, self._spring_particles_ids_paris) < (self.R + self.R_spring) ** 2]
+
+        ic = np.vstack([
+            ic_spring,
+            ic_particles,
+            ic_spring_particles
+        ])
 
         self._v[:, ic[:, 0]], self._v[:, ic[:, 1]] = self.compute_new_v(
             self._v[:, ic[:, 0]], self._v[:, ic[:, 1]],
@@ -166,7 +190,7 @@ class Simulation:
 
         self._r = self._r + self._v * dt
 
-        return f
+        return f @ dr
 
 
 # TODO:

@@ -1,47 +1,59 @@
+import itertools
+
 import numpy as np
 from numpy import ndarray
 from typing import Self, Tuple, List
 
 
 class Simulation:
-    def __init__(self, T: float, gamma: float, k: float, l_0: float, R: float, R_spring: float,
+    def __init__(self, gamma: float, k: float, l_0: float, R: float, R_spring: float,
                  r: ndarray, r_spring: ndarray,
                  v: ndarray, v_spring: ndarray,
                  m: ndarray, m_spring: ndarray):
-        self._T = T
         self._gamma = gamma
         self._k = k
         self._l_0 = l_0
         self._R = R
         self._R_spring = R_spring
-        self._r = r
-        self._r_spring = r_spring
-        self._v = v
-        self._v_spring = v_spring
-        self._m = m
-        self._m_spring = m_spring
+        self._r = np.hstack([r_spring, r])
+        # self._r_spring = r_spring
+        self._v = np.hstack([v_spring, v])
+        # self._v_spring = v_spring
+        self._m = np.hstack([m_spring, m])
+        # self._m_spring = m_spring
+        self._n_particles = r.shape[1]
+        self._n_spring = r_spring.shape[1]
+
+        ids = np.arange(self._n_particles + self._n_spring)
+        self._ids_pairs = np.asarray(list(itertools.combinations(ids, 2)))
 
     def __iter__(self) -> Self:
         return self
 
     def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
-        n_particles = self._r.shape[1]
-        n_spring = self._r_spring.shape[1]
+        # n_particles = self._n_particles
+        # n_spring = self._n_spring
+        #
+        # new_r = np.random.uniform(size=(2, n_particles))
+        # new_v = np.random.uniform(size=(2, n_particles))
+        # new_r_spr = np.random.uniform(size=(2, n_spring))
+        # new_v_spr = np.random.uniform(size=(2, n_spring))
+        # new_f = np.random.uniform()
+        #
+        # return new_r, new_r_spr, new_v, new_v_spr, new_f
 
-        new_r = np.random.uniform(size=(2, n_particles))
-        new_v = np.random.uniform(size=(2, n_particles))
-        new_r_spr = np.random.uniform(size=(2, n_spring))
-        new_v_spr = np.random.uniform(size=(2, n_spring))
-        new_f = np.random.uniform()
+        f = self.motion(dt=0.000008)
 
-        return new_r, new_r_spr, new_v, new_v_spr, new_f
+        return self.r, self.r_spring, self.v, self.v_spring, f
 
     @property
     def T(self) -> float:
+        raise NotImplemented
         return self._T
 
     @T.setter
     def T(self, val: float):
+        raise NotImplemented
         self._T = val
 
     @property
@@ -86,38 +98,38 @@ class Simulation:
 
     @property
     def r(self) -> ndarray:
-        return self._r
+        return self._r[:, self._n_spring:]
 
     @property
     def r_spring(self) -> ndarray:
-        return self._r_spring
+        return self._r[:, :self._n_spring]
 
     @property
     def v(self) -> ndarray:
-        return self._v
+        return self._v[:, self._n_spring:]
 
     @property
     def v_spring(self) -> ndarray:
-        return self._v_spring
+        return self._v[:, :self._n_spring]
 
     @property
     def m(self) -> ndarray:
-        return self._m
+        return self._m[self._n_spring:]
 
     @property
     def m_spring(self) -> ndarray:
-        return self._m_spring
+        return self._m[:self._n_spring]
 
     def calc_kinetic_energy(self) -> ndarray:
-        return np.random.uniform(size=(self.r_spring.shape[1],))
+        return np.random.uniform(size=(self._n_spring,))
 
     def calc_potential_energy(self) -> ndarray:
-        return np.random.uniform(size=(self.r_spring.shape[1],))
+        return np.random.uniform(size=(self._n_spring,))
 
     @staticmethod
     def get_deltad2_pairs(r, ids_pairs):
-        dx = torch.diff(torch.stack([r[0][ids_pairs[:, 0]], r[0][ids_pairs[:, 1]]]).T).squeeze()
-        dy = torch.diff(torch.stack([r[1][ids_pairs[:, 0]], r[1][ids_pairs[:, 1]]]).T).squeeze()
+        dx = np.diff(np.stack([r[0][ids_pairs[:, 0]], r[0][ids_pairs[:, 1]]]).T).squeeze()
+        dy = np.diff(np.stack([r[1][ids_pairs[:, 0]], r[1][ids_pairs[:, 1]]]).T).squeeze()
         return dx ** 2 + dy ** 2
 
     @staticmethod
@@ -131,8 +143,8 @@ class Simulation:
 
         return v1new, v2new
 
-    def motion(self, id_pairs, dt, d_cutoff):
-        ic = id_pairs[self.get_deltad2_pairs(self.r, self._ids_pairs) < d_cutoff ** 2]  # _ids_pairs aren't created
+    def motion(self, dt):
+        ic = self._ids_pairs[self.get_deltad2_pairs(self._r, self._ids_pairs) < self.R ** 2]
 
         self._v[:, ic[:, 0]], self._v[:, ic[:, 1]] = self.compute_new_v(
             self._v[:, ic[:, 0]], self._v[:, ic[:, 1]],
@@ -141,7 +153,8 @@ class Simulation:
         )
 
         dr = self.r_spring[:, 0] - self.r_spring[:, 1]
-        dr_sc = dr.norm()
+        # dr_sc = dr.norm()
+        dr_sc = np.linalg.norm(dr)
         f = dr * (self.k * (1 - self.l_0 / dr_sc))
         self.v_spring[:, 0] -= f * (dt / self.m_spring[0])
         self.v_spring[:, 1] += f * (dt / self.m_spring[1])

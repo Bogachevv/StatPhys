@@ -14,19 +14,21 @@ class Simulation:
         self._l_0 = l_0
         self._R = R
         self._R_spring = R_spring
-        self._r = r
-        self._r_spring = r_spring
-        self._v = v
-        self._v_spring = v_spring
-        self._m = m
-        self._m_spring = m_spring
+        self._spring_c = r_spring.shape[0]
+        self._particle_c = r.shape[0]
+        self._r = np.hstack([r_spring, r])
+        # self._r_spring = r_spring
+        self._v = np.hstack([v_spring, v])
+        # self._v_spring = v_spring
+        self._m = np.hstack([m_spring, m])
+        # self._m_spring = m_spring
 
     def __iter__(self) -> Self:
         return self
 
     def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
-        n_particles = self._r.shape[1]
-        n_spring = self._r_spring.shape[1]
+        n_particles = self._particle_c
+        n_spring = self._spring_c
 
         new_r = np.random.uniform(size=(2, n_particles))
         new_v = np.random.uniform(size=(2, n_particles))
@@ -86,27 +88,27 @@ class Simulation:
 
     @property
     def r(self) -> ndarray:
-        return self._r
+        return self._r[self._spring_c:]
 
     @property
     def r_spring(self) -> ndarray:
-        return self._r_spring
+        return self._r[:self._spring_c]
 
     @property
     def v(self) -> ndarray:
-        return self._v
+        return self._v[self._spring_c:]
 
     @property
     def v_spring(self) -> ndarray:
-        return self._v_spring
+        return self._v[:self._spring_c]
 
     @property
     def m(self) -> ndarray:
-        return self._m
+        return self._m[self._spring_c:]
 
     @property
     def m_spring(self) -> ndarray:
-        return self._m_spring
+        return self._m[:self._spring_c]
 
     def calc_kinetic_energy(self) -> ndarray:
         return np.random.uniform(size=(self.r_spring.shape[1],))
@@ -116,8 +118,8 @@ class Simulation:
 
     @staticmethod
     def get_deltad2_pairs(r, ids_pairs):
-        dx = torch.diff(torch.stack([r[0][ids_pairs[:, 0]], r[0][ids_pairs[:, 1]]]).T).squeeze()
-        dy = torch.diff(torch.stack([r[1][ids_pairs[:, 0]], r[1][ids_pairs[:, 1]]]).T).squeeze()
+        dx = np.diff(np.vstack([r[0][ids_pairs[:, 0]], r[0][ids_pairs[:, 1]]]).T).squeeze()
+        dy = np.diff(np.vstack([r[1][ids_pairs[:, 0]], r[1][ids_pairs[:, 1]]]).T).squeeze()
         return dx ** 2 + dy ** 2
 
     @staticmethod
@@ -141,7 +143,7 @@ class Simulation:
         )
 
         dr = self.r_spring[:, 0] - self.r_spring[:, 1]
-        dr_sc = dr.norm()
+        dr_sc = np.linalg.norm(dr)
         f = dr * (self.k * (1 - self.l_0 / dr_sc))
         self.v_spring[:, 0] -= f * (dt / self.m_spring[0])
         self.v_spring[:, 1] += f * (dt / self.m_spring[1])

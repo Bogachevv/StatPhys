@@ -56,8 +56,10 @@ class Simulation:
 
     @property
     def T(self) -> float:
-        raise NotImplemented
-        return self._T
+        # raise NotImplemented
+        # return self._T
+        k_boltz = 1.380 * (10 ** (-23))
+        return np.mean(((np.linalg.norm(self._v, axis=0) ** 2) * self._m)) / (2 * k_boltz)
 
     @T.setter
     def T(self, val: float):
@@ -128,11 +130,14 @@ class Simulation:
     def m_spring(self) -> ndarray:
         return self._m[:self._n_spring]
 
-    def calc_kinetic_energy(self) -> ndarray:
-        return np.random.uniform(size=(self._n_spring,))
+    def calc_kinetic_energy(self) -> float:
+        return np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
 
-    def calc_potential_energy(self) -> ndarray:
-        return np.random.uniform(size=(self._n_spring,))
+    def calc_potential_energy(self) -> float:
+        dr = self.r_spring[:, 0] - self.r_spring[:, 1]
+        dr_sc = np.linalg.norm(dr)
+        dx_norm = np.abs(dr_sc - self.l_0)
+        return self._k * (dx_norm ** (self._gamma + 1)) / (self._gamma + 1)
 
     @staticmethod
     def get_deltad2_pairs(r, ids_pairs):
@@ -141,7 +146,7 @@ class Simulation:
         return dx ** 2 + dy ** 2
 
     @staticmethod
-    def compute_new_v(v1, v2, r1, r2, m1, m2):
+    def compute_new_v(v1, v2, r1, r2, m1, m2) -> Tuple[ndarray, ndarray]:
         m_s = m1 + m2
         dr = r1 - r2
         dr_norm_sq = np.linalg.norm(dr, axis=0) ** 2
@@ -151,7 +156,7 @@ class Simulation:
 
         return v1new, v2new
 
-    def motion(self, dt):
+    def motion(self, dt) -> float:
         # ic = self._ids_pairs[self.get_deltad2_pairs(self._r, self._ids_pairs) < self.R ** 2]
 
         ic_spring = self._spring_ids_pairs[
@@ -179,7 +184,9 @@ class Simulation:
         dr = self.r_spring[:, 0] - self.r_spring[:, 1]
         # dr_sc = dr.norm()
         dr_sc = np.linalg.norm(dr)
-        f = dr * (self.k * (1 - self.l_0 / dr_sc))
+        dx = dr * (1 - self.l_0 / dr_sc)
+        dx_norm = np.abs(dr_sc - self.l_0)
+        f = (self._k * (dx_norm ** (self._gamma - 1))) * dx
         self.v_spring[:, 0] -= f * (dt / self.m_spring[0])
         self.v_spring[:, 1] += f * (dt / self.m_spring[1])
 

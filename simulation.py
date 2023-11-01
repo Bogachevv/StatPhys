@@ -199,6 +199,50 @@ class Simulation:
 
         return f @ dr
 
+    def add_particles(self, r: ndarray, v: ndarray, m: ndarray):
+        if (r.shape != v.shape) or (r.shape[0] != self._r.shape[0]) or (r.shape[1] != m.shape[0]):
+            raise ValueError("Incorrect shape")
+        self._r = np.hstack([self._r, r])
+        self._v = np.hstack([self._v, v])
+        self._m = np.hstack([self._m, m])
+
+    def _set_particles_cnt(self, particles_cnt: int):
+        if particles_cnt < 0:
+            raise ValueError("particles_cnt must be >= 0")
+
+        if particles_cnt < self._n_particles:
+            idx = slice(self._n_spring + particles_cnt)
+            self._r = self._r[:, idx]
+            self._v = self._v[:, idx]
+            self._m = self._m[idx]
+            self._n_particles = particles_cnt
+        if particles_cnt > self._n_particles:
+            new_cnt = particles_cnt - self._n_particles
+            self.add_particles(
+                r=np.random.uniform(size=(2, new_cnt)),
+                v=np.full(shape=(new_cnt, 2), fill_value=np.std(self.v, axis=1)).T,
+                m=np.full(shape=(new_cnt, ), fill_value=np.median(self.m))
+            )
+            self._n_particles = particles_cnt
+
+    def set_params(self,
+                   gamma: float = None, k: float = None, l_0: float = None,
+                   R: float = None, R_spring: float = None, T: float = None,
+                   particles_cnt: int = None):
+        if gamma is not None:
+            self.gamma = gamma
+        if k is not None:
+            self.k = k
+        if l_0 is not None:
+            self.l_0 = l_0
+        if R is not None:
+            self.R = R
+        if R_spring is not None:
+            self.R_spring = R_spring
+        if T is not None:
+            self.T = T
+        if particles_cnt is not None:
+            self._set_particles_cnt(particles_cnt)
 
 # TODO:
 #   1) rewrite get_deltad2_pairs

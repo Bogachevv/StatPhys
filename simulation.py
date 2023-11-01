@@ -217,7 +217,6 @@ class Simulation:
             self._r = self._r[:, idx]
             self._v = self._v[:, idx]
             self._m = self._m[idx]
-            self._n_particles = particles_cnt
         if particles_cnt > self._n_particles:
             new_cnt = particles_cnt - self._n_particles
             self.add_particles(
@@ -225,7 +224,16 @@ class Simulation:
                 v=np.full(shape=(new_cnt, 2), fill_value=np.std(self.v, axis=1)).T,
                 m=np.full(shape=(new_cnt, ), fill_value=np.median(self.m))
             )
-            self._n_particles = particles_cnt
+
+        self._n_particles = particles_cnt
+
+        spring_ids = np.arange(self._n_spring)
+        self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))
+
+        particles_ids = np.arange(self._n_particles) + self._n_spring
+        self._particles_ids_pairs = np.asarray(list(itertools.combinations(particles_ids, 2)))
+
+        self._spring_particles_ids_paris = np.asarray(list(itertools.product(spring_ids, particles_ids)))
 
     def set_params(self,
                    gamma: float = None, k: float = None, l_0: float = None,

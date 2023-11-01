@@ -63,8 +63,10 @@ class Simulation:
 
     @T.setter
     def T(self, val: float):
-        raise NotImplemented
-        self._T = val
+        if val <= 0:
+            raise ValueError("T  must be > 0")
+        delta = val / self.T
+        self._v *= np.sqrt(delta)
 
     @property
     def gamma(self) -> float:
@@ -228,6 +230,7 @@ class Simulation:
     def set_params(self,
                    gamma: float = None, k: float = None, l_0: float = None,
                    R: float = None, R_spring: float = None, T: float = None,
+                   m_scale: float = None, m_spring_scale: float = None,
                    particles_cnt: int = None):
         if gamma is not None:
             self.gamma = gamma
@@ -241,13 +244,16 @@ class Simulation:
             self.R_spring = R_spring
         if T is not None:
             self.T = T
+        if m_scale is not None:
+            if m_scale <= 0:
+                raise ValueError("m_scale must be > 0")
+            self._m[self._n_spring:] *= m_scale
+        if m_spring_scale is not None:
+            if m_spring_scale <= 0:
+                raise ValueError("m_spring_scale must be > 0")
+            self._m[0:self._n_spring] *= m_spring_scale
         if particles_cnt is not None:
             self._set_particles_cnt(particles_cnt)
-
-# TODO:
-#   1) rewrite get_deltad2_pairs
-#   2) modify index colides (ic) for 2 types of particles
-#   3) think about data layout
 
 # video:
 # https://youtu.be/iSEAidM-DDI?si=TdfkNox4gglKLRd3

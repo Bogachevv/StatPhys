@@ -225,20 +225,21 @@ class Simulation:
                 m=np.full(shape=(new_cnt, ), fill_value=np.median(self.m))
             )
 
-        self._n_particles = particles_cnt
+        if particles_cnt != self._n_particles:
+            self._n_particles = particles_cnt
 
-        spring_ids = np.arange(self._n_spring)
-        self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))
+            spring_ids = np.arange(self._n_spring)
+            self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))
 
-        particles_ids = np.arange(self._n_particles) + self._n_spring
-        self._particles_ids_pairs = np.asarray(list(itertools.combinations(particles_ids, 2)))
+            particles_ids = np.arange(self._n_particles) + self._n_spring
+            self._particles_ids_pairs = np.asarray(list(itertools.combinations(particles_ids, 2)))
 
-        self._spring_particles_ids_paris = np.asarray(list(itertools.product(spring_ids, particles_ids)))
+            self._spring_particles_ids_paris = np.asarray(list(itertools.product(spring_ids, particles_ids)))
 
     def set_params(self,
                    gamma: float = None, k: float = None, l_0: float = None,
                    R: float = None, R_spring: float = None, T: float = None,
-                   m_scale: float = None, m_spring_scale: float = None,
+                   m: float = None, m_spring: float = None,
                    particles_cnt: int = None):
         if gamma is not None:
             self.gamma = gamma
@@ -252,14 +253,14 @@ class Simulation:
             self.R_spring = R_spring
         if T is not None:
             self.T = T
-        if m_scale is not None:
-            if m_scale <= 0:
+        if m is not None:
+            if m <= 0:
                 raise ValueError("m_scale must be > 0")
-            self._m[self._n_spring:] *= m_scale
-        if m_spring_scale is not None:
-            if m_spring_scale <= 0:
+            self._m[self._n_spring:] = m
+        if m_spring is not None:
+            if m_spring <= 0:
                 raise ValueError("m_spring_scale must be > 0")
-            self._m[0:self._n_spring] *= m_spring_scale
+            self._m[0:self._n_spring] = m_spring
         if particles_cnt is not None:
             self._set_particles_cnt(particles_cnt)
 

@@ -1,5 +1,4 @@
 import pygame
-import sys
 from button import Button
 
 class MenuScreen:
@@ -47,7 +46,7 @@ class MenuScreen:
     def _check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT: 
-                sys.exit()
+                quit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
                 self._check_buttons(mouse_position)
@@ -60,4 +59,4 @@ class MenuScreen:
                 if index == 2:
                     self.app.active_screen = self.app.authors_screen
                 elif index == 3:
-                    sys.exit()
+                    quit()

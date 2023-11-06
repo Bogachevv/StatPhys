@@ -2,6 +2,9 @@ import pygame
 import numpy as np
 from simulation import Simulation
 
+R_SIZE = 0.01
+R_MASS = 10e-5
+
 class Demo:
     def __init__(self, app, position, demo_size, bg_color, border_color, bg_screen_color, params):
         self.screen = app.screen
@@ -13,7 +16,6 @@ class Demo:
         self.size = demo_size[0]
         self.pos_start = position[0], position[1] + self.size
 
-        print(params)
 
         self.params = params
         # self.simulation = Simulation(1, params['k'], params['l_0'], params['R'] / 1000, 0.05,
@@ -23,26 +25,47 @@ class Demo:
         #                              np.full((2, ), params['m_spring'] * (10 ** (-5))))
         r_init = np.random.uniform(size=(2, params['r'] + 2))
         v_init = np.random.uniform(low=-500, high=500, size=(2, params['r'] + 2))
-        m = np.ones((params['r'] + 2, )) * 10e-5
+        m = np.ones((params['r'] + 2, )) * R_MASS
         m_spring = m[:2] * params['m_spring']
         m = m[2:]
         r, r_spring = r_init[:, 2:], r_init[:, :2]
         v, v_spring = v_init[:, 2:], v_init[:, :2]
         # Размер броуновских частиц
-        R_SIZE = 0.01
 
         self.simulation = Simulation(
-            gamma=1.0, k=params['k'], l_0=params['l_0'], R=R_SIZE, R_spring=0.025,
+            gamma=params['gamma'], k=params['k'], l_0=0.1, R=R_SIZE, R_spring=R_SIZE * params['R'],
             r=r, r_spring=r_spring,
             v=v, v_spring=v_spring,
             m=m, m_spring=m_spring,
         )
 
+    def set_params(self, params, par):
+        if par == 'gamma':
+            self.simulation.set_params(gamma=params['gamma'])
+        elif par == 'k':
+            self.simulation.set_params(k=params['k'])
+        elif par == 'R':
+            self.simulation.set_params(R_spring=params['R'] * R_SIZE)
+        elif par == 'T':
+            self.simulation.set_params(T=params['T'])
+        elif par == 'r':
+            self.simulation.set_params(particles_cnt=params['r'])
+        elif par == 'm_spring':
+            self.simulation.set_params(m_spring=params['m_spring'] * R_MASS)
+
     def draw_check(self, params):
         pygame.draw.rect(self.screen, self.bg_color, self.main)
-        if sum(abs(par1 - par2) > 1e-4 for par1, par2 in zip(params['params'].values(), self.params.values())):
-            self.simulation.set_params(params)
-            self.params = params['params']
+        # updating params
+        modified_par = None
+        for i, par1, par2 in zip(range(len(self.params)), params['params'].values(), self.params.values()):
+            if abs(par1 - par2) > 1e-4:
+                modified_par = list(self.params.keys())[i]
+                break
+
+        if modified_par is not None:
+            self.set_params(params['params'], modified_par)
+            self.params[modified_par] = params['params'][modified_par]
+
         new_args = next(self.simulation)
 
         params['kinetic'] = self.simulation.calc_kinetic_energy().item()

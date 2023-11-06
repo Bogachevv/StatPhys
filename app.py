@@ -1,6 +1,5 @@
 import pygame
 import screeninfo
-import sys
 from menu_screen import MenuScreen
 from authors_screen import AuthorsScreen
 from demo_screen import DemoScreen

@@ -2,7 +2,6 @@ import itertools
 
 import numpy as np
 from numpy import ndarray
-from typing import Tuple, List
 
 
 class Simulation:
@@ -38,7 +37,7 @@ class Simulation:
     def __iter__(self):
         return self
 
-    def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
+    def __next__(self):
         # n_particles = self._n_particles
         # n_spring = self._n_spring
         #
@@ -50,7 +49,6 @@ class Simulation:
         #
         # return new_r, new_r_spr, new_v, new_v_spr, new_f
 
-        # print(f"{np.min(self._r)}=")
         f = self.motion(dt=0.000008)
 
         return self.r, self.r_spring, self.v, self.v_spring, f
@@ -64,8 +62,10 @@ class Simulation:
 
     @T.setter
     def T(self, val: float):
-        raise NotImplemented
-        self._T = val
+        if val <= 0:
+            raise ValueError("T  must be > 0")
+        delta = val / self.T
+        self._v *= np.sqrt(delta)
 
     @property
     def gamma(self) -> float:
@@ -147,12 +147,11 @@ class Simulation:
         return dx ** 2 + dy ** 2
 
     @staticmethod
-    def compute_new_v(v1, v2, r1, r2, m1, m2) -> Tuple[ndarray, ndarray]:
+    def compute_new_v(v1, v2, r1, r2, m1, m2):
         m_s = m1 + m2
         dr = r1 - r2
         dr_norm_sq = np.linalg.norm(dr, axis=0) ** 2
 
-        # print(f"{dr_norm_sq=}\t{m_s=}")
         v1new = v1 - (np.sum((2 * m2 / m_s) * (v1 - v2) * dr, axis=0) * dr) / dr_norm_sq
         v2new = v2 - (np.sum((2 * m1 / m_s) * (v2 - v1) * dr, axis=0) * dr) / dr_norm_sq
 
@@ -176,10 +175,6 @@ class Simulation:
             ic_particles,
             ic_spring_particles
         ])
-
-        # print(f"{ic.shape=}")
-        # print(f"{self.r.shape=}\t{self.r_spring.shape=}\t{self._r.shape=}")
-        # print(f"{self.v.shape=}\t{self.v_spring.shape=}\t{self._v.shape=}")
 
         self._v[:, ic[:, 0]], self._v[:, ic[:, 1]] = self.compute_new_v(
             self._v[:, ic[:, 0]], self._v[:, ic[:, 1]],
@@ -205,15 +200,68 @@ class Simulation:
 
         return f @ dr
 
-    # def set_params(self, params: dict):
-    #     self.k = params['k']
-    #     self.l_0 = params['l_0']
-    #     self.m_spring
+    def add_particles(self, r: ndarray, v: ndarray, m: ndarray):
+        if (r.shape != v.shape) or (r.shape[0] != self._r.shape[0]) or (r.shape[1] != m.shape[0]):
+            raise ValueError("Incorrect shape")
+        self._r = np.hstack([self._r, r])
+        self._v = np.hstack([self._v, v])
+        self._m = np.hstack([self._m, m])
 
-# TODO:
-#   1) rewrite get_deltad2_pairs
-#   2) modify index colides (ic) for 2 types of particles
-#   3) think about data layout
+    def _set_particles_cnt(self, particles_cnt: int):
+        if particles_cnt < 0:
+            raise ValueError("particles_cnt must be >= 0")
+
+        if particles_cnt < self._n_particles:
+            idx = slice(self._n_spring + particles_cnt)
+            self._r = self._r[:, idx]
+            self._v = self._v[:, idx]
+            self._m = self._m[idx]
+        if particles_cnt > self._n_particles:
+            new_cnt = particles_cnt - self._n_particles
+            self.add_particles(
+                r=np.random.uniform(size=(2, new_cnt)),
+                v=np.full(shape=(new_cnt, 2), fill_value=np.std(self.v, axis=1)).T,
+                m=np.full(shape=(new_cnt, ), fill_value=np.median(self.m))
+            )
+
+        if particles_cnt != self._n_particles:
+            self._n_particles = particles_cnt
+
+            spring_ids = np.arange(self._n_spring)
+            self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))
+
+            particles_ids = np.arange(self._n_particles) + self._n_spring
+            self._particles_ids_pairs = np.asarray(list(itertools.combinations(particles_ids, 2)))
+
+            self._spring_particles_ids_paris = np.asarray(list(itertools.product(spring_ids, particles_ids)))
+
+    def set_params(self,
+                   gamma: float = None, k: float = None, l_0: float = None,
+                   R: float = None, R_spring: float = None, T: float = None,
+                   m: float = None, m_spring: float = None,
+                   particles_cnt: int = None):
+        if gamma is not None:
+            self.gamma = gamma
+        if k is not None:
+            self.k = k
+        if l_0 is not None:
+            self.l_0 = l_0
+        if R is not None:
+            self.R = R
+        if R_spring is not None:
+            self.R_spring = R_spring
+        if T is not None:
+            self.T = T
+        if m is not None:
+            if m <= 0:
+                raise ValueError("m_scale must be > 0")
+            self._m[self._n_spring:] = m
+        if m_spring is not None:
+            if m_spring <= 0:
+                raise ValueError("m_spring_scale must be > 0")
+            self._m[0:self._n_spring] = m_spring
+        if particles_cnt is not None:
+            self._set_particles_cnt(particles_cnt)
 
 # video:
 # https://youtu.be/iSEAidM-DDI?si=TdfkNox4gglKLRd3

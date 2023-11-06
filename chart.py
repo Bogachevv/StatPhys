@@ -13,7 +13,7 @@ class ListBuff:
         self.buff[self.ind] = other
         self.ind += 1
         if self.ind == self.size:
-            self.main.extend(self.buff)
+            self.main.append(sum(self.buff) / self.size)
             self.ind = 0
 
     def __len__(self):
@@ -33,6 +33,6 @@ class Chart:
         self.buf.append(params[self.name])
         if len(self.buf) > 1:
             self.chart.add_title(f'{self.name}_energy')
-            self.chart.line(self.name, list(range(1, len(self.buf) + 1)), self.buf.main, line_width=10)
+            self.chart.line(self.name, list(range(1, len(self.buf) + 1)), self.buf.main, line_width=3)
             self.chart.draw()
             pygame.draw.rect(self.screen, self.bd_params[0], self.border, self.bd_params[1])

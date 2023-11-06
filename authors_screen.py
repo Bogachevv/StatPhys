@@ -1,5 +1,4 @@
 import pygame
-import sys
 from button import Button
 
 class AuthorsScreen():
@@ -52,7 +51,7 @@ class AuthorsScreen():
     def _check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                sys.exit()
+                quit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
                 self._check_buttons(mouse_position)

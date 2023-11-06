@@ -1,6 +1,5 @@
 import pygame
 import pygame_widgets
-import sys
 from button import Button
 from slider import *
 from demo import Demo
@@ -23,10 +22,10 @@ class DemoScreen:
         param_names = ['Размер связанных частиц:', 'Температура:', 'Число молекул:', 'Коэффицент упругости:', 'Коэффицент нелинейности:', 'Масса связанных частиц:']
         sliders_gap = 70
         param_poses = [(1600, h) for h in range(150, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
-        param_bounds = [(1, 10), (0, 500), (50, 150), (100, 500), (0.01, 1), (1, 10)]
+        param_bounds = [(1, 5), (0, 500), (50, 150), (100, 500), (0.01, 1), (1, 10)]
         param_step = [round((b[1] - b[0]) / 100, 3) for b in param_bounds]
         param_step[1], param_step[2] = int(param_step[1]), int(param_step[2])
-        par4sim = ['R', 'T', 'r', 'k', 'l_0', 'm_spring']
+        par4sim = ['R', 'T', 'r', 'k', 'gamma', 'm_spring']
         dec_numbers = [1, 0, 0, 0, 1, 0]
 
         self.sliders = [SliderTest(app, name, pos, bounds, step, name_par, dec_number, button_color=self.bg_color, font='sans', bold=False, fontSize=25)
@@ -35,8 +34,8 @@ class DemoScreen:
         
         self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)}, 'kinetic': 0, 'potential': 0}
 
-        self.graphics = [Chart(self.app,'kinetic', (100, 670), (500, 400), (100, 100, 100), 5),
-                         Chart(self.app,'potential', (650, 670), (500, 400), (100, 100, 100), 5)]
+        self.graphics = [Chart(self.app,'kinetic', (100, 670), (500, 400), (100, 100, 100)),
+                         Chart(self.app,'potential', (650, 670), (500, 400), (100, 100, 100))]
 
 
 
@@ -55,7 +54,7 @@ class DemoScreen:
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
-                sys.exit()
+                quit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
                 self._check_buttons(mouse_position)

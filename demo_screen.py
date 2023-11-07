@@ -42,8 +42,11 @@ class DemoScreen:
         self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)}, 'kinetic': 0,
                             'potential': 0}
 
-        self.graphics = [Chart(self.app, 'kinetic', (100, 670), (500, 400), (100, 100, 100)),
-                         Chart(self.app, 'potential', (650, 670), (500, 400), (100, 100, 100))]
+        buf_len = config.ConfigLoader()['buf_len']
+        self.graphics = [Chart(self.app, 'kinetic', (100, 670), (500, 400), (100, 100, 100),
+                               len_buf=buf_len, const_legend='theoretical kinetic'),
+                         Chart(self.app, 'potential', (650, 670), (500, 400), (100, 100, 100),
+                               len_buf=buf_len, const_legend='theoretical potential')]
 
         self.slider_grabbed = False
 

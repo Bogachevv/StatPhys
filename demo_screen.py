@@ -35,16 +35,6 @@ class DemoScreen:
         self.slider_grabbed = False
 
     def _load_params(self):
-        # param_names = ['Размер связанных частиц:', 'Температура:', 'Число молекул:', 'Коэффицент упругости:',
-        #                'Коэффицент нелинейности:', 'Масса связанных частиц:']
-        # sliders_gap = 70
-        # param_poses = [(1600, h) for h in range(150, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
-        # param_bounds = [(1, 5), (1, 500), (50, 150), (100, 500), (0.01, 1), (1, 10)]
-        # param_step = [round((b[1] - b[0]) / 100, 3) for b in param_bounds]
-        # param_step[1], param_step[2] = int(param_step[1]), int(param_step[2])
-        # par4sim = ['R', 'T', 'r', 'k', 'gamma', 'm_spring']
-        # dec_numbers = [1, 0, 0, 0, 1, 0]
-
         loader = configloader.ConfigLoader()
         with open("config.json", "r", encoding="utf-8") as f:
             loader.update_from_json_file(f)

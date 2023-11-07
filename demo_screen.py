@@ -21,15 +21,19 @@ class DemoScreen:
 
         self.buttons = [Button(app, "Назад", (1300, 900), (300, 80))]
 
-        param_names, sliders_gap, param_poses, param_bounds, param_step, par4sim, dec_numbers = self._load_params()
+        param_names, sliders_gap, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers = (
+            self._load_params())
+
+        param_initial = map(_init_val_into_unit, param_initial, param_bounds)
 
         self.sliders = [
             ParamSlider(app, name, pos, bounds, step, name_par, dec_number,
                         button_color=self.bg_color, font='sans',
-                        bold=False, fontSize=25
+                        bold=False, fontSize=25,
+                        initial_pos=initial
                         )
-            for name, pos, bounds, step, name_par, dec_number in
-            zip(param_names, param_poses, param_bounds, param_step, par4sim, dec_numbers)
+            for name, pos, bounds, initial, step, name_par, dec_number in
+            zip(param_names, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers)
         ]
 
         self.demo = Demo(app, (170, 50), (600, 600), (255, 255, 255), (100, 100, 100), self.bg_color,
@@ -52,14 +56,16 @@ class DemoScreen:
         sliders_gap = loader['sliders_gap']
         param_poses = [(1600, h) for h in range(150, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
         param_bounds = []
+        param_initial = []
         for param_name in param_names:
             param_bounds.append(tuple(loader['param_bounds'][param_name]))
+            param_initial.append(loader['param_initial'][param_name])
         param_step = [round((b[1] - b[0]) / 100, 3) for b in param_bounds]
         param_step[1], param_step[2] = int(param_step[1]), int(param_step[2])
         par4sim = loader['par4sim']
         dec_numbers = [1, 0, 0, 0, 1, 0]
 
-        return param_names, sliders_gap, param_poses, param_bounds, param_step, par4sim, dec_numbers
+        return param_names, sliders_gap, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers
 
     def _update_screen(self):
         self.screen.fill(self.bg_color)
@@ -110,3 +116,10 @@ class DemoScreen:
     def _draw_figures(self):
         for fig in self.graphics:
             fig.draw(self.demo_params)
+
+
+def _init_val_into_unit(initial_val, bounds) -> float:
+    if not (bounds[0] <= initial_val <= bounds[1]):
+        raise ValueError("Initial val mus be in [bounds[0], bounds[1]]")
+
+    return (initial_val - bounds[0]) / (bounds[1] - bounds[0])

@@ -1,10 +1,11 @@
-from pygame_widgets.slider import Slider
 from button import Button
 import pygame
 
 
 class ParamSlider:
-    def __init__(self, app, name, position, bounds, step, name_par, dec_number, **kwargs):
+    def __init__(self, app, name, position, bounds, step, name_par, dec_number,
+                 initial_pos: float = 0.5,
+                 **kwargs):
         self.name_par = name_par
         self.dec_round = lambda x: int(x) if dec_number == 0 else round(x, dec_number)
         self.init_values = {
@@ -19,7 +20,7 @@ class ParamSlider:
             }
         }
 
-        self.slider = _SliderImpl(app, position, self.init_values['slider'], 0.5, bounds[0], bounds[1])
+        self.slider = _SliderImpl(app, position, self.init_values['slider'], initial_pos, bounds[0], bounds[1])
 
         self.sl_val = Button(app, str(self.slider.getValue()),
                              list((position[i] - self.init_values['sl_value']['offset'][i] for i in range(2))),

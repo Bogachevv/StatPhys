@@ -2,7 +2,7 @@ import itertools
 
 import numpy as np
 from numpy import ndarray
-from typing import Self, Tuple, List
+from typing import Tuple, List
 
 
 class Simulation:
@@ -10,6 +10,7 @@ class Simulation:
                  r: ndarray, r_spring: ndarray,
                  v: ndarray, v_spring: ndarray,
                  m: ndarray, m_spring: ndarray):
+        self._k_boltz = 1.380 * 1e-2
         self._gamma = gamma
         self._k = k
         self._l_0 = l_0
@@ -35,7 +36,7 @@ class Simulation:
 
         self._spring_particles_ids_paris = np.asarray(list(itertools.product(spring_ids, particles_ids)))
 
-    def __iter__(self) -> Self:
+    def __iter__(self):
         return self
 
     def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
@@ -58,8 +59,7 @@ class Simulation:
     def T(self) -> float:
         # raise NotImplemented
         # return self._T
-        k_boltz = 1.380 * (10 ** (-23))
-        return np.mean(((np.linalg.norm(self._v, axis=0) ** 2) * self._m)) / (2 * k_boltz)
+        return np.mean(((np.linalg.norm(self._v, axis=0) ** 2) * self._m)) / (2 * self._k_boltz)
 
     @T.setter
     def T(self, val: float):

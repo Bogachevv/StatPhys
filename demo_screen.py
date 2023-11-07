@@ -5,7 +5,7 @@ from slider import *
 from demo import Demo
 import pygame_chart as pyc
 from chart import Chart
-import configloader
+import config
 
 
 class DemoScreen:
@@ -48,9 +48,7 @@ class DemoScreen:
         self.slider_grabbed = False
 
     def _load_params(self):
-        loader = configloader.ConfigLoader()
-        with open("config.json", "r", encoding="utf-8") as f:
-            loader.update_from_json_file(f)
+        loader = config.ConfigLoader()
 
         param_names = loader['param_names']
         sliders_gap = loader['sliders_gap']

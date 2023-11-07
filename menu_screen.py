@@ -1,6 +1,7 @@
 import pygame
 from button import Button
 
+
 class MenuScreen:
     def __init__(self, app):
         self.app = app
@@ -27,12 +28,14 @@ class MenuScreen:
                 self.strings_surfaces.append(self.little_font.render(string, False, (0, 0, 0)))
             else:
                 self.strings_surfaces.append(self.big_font.render(string, True, (50, 50, 50)))
-        #self.positions = [(400, 100), (500, 150), (700, 250), (800, 300), (550, 400), (670, 470)]
+
         self.positions = [(560, 100), (450, 150), (680, 250), (780, 300), (550, 400), (670, 470)]
         self.cmc_logo = pygame.transform.scale(pygame.image.load(self.folder + "cmc_logo.jpg"), (140, 140))
         self.msu_logo = pygame.transform.scale(pygame.image.load(self.folder + "msu_logo.jpg"), (150, 150))
-        self.buttons = [Button(app, "Демонстрация", (750, 600), (400, 80)), Button(app, "Теория", (750, 700), (400, 80)),
-                        Button(app, "Авторы", (750, 800), (400, 80)), Button(app, "Выход", (750, 900), (400, 80))]
+        self.buttons = [Button(app, "Демонстрация", (750, 600), (400, 80)),
+                        Button(app, "Теория", (750, 700), (400, 80)),
+                        Button(app, "Авторы", (750, 800), (400, 80)),
+                        Button(app, "Выход", (750, 900), (400, 80))]
     
     def _update_screen(self):
         self.screen.fill(self.bg_color)

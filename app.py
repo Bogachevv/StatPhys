@@ -3,6 +3,7 @@ import screeninfo
 from menu_screen import MenuScreen
 from authors_screen import AuthorsScreen
 from demo_screen import DemoScreen
+import config
 
 
 class App:
@@ -17,16 +18,19 @@ class App:
 
         self.active_screen = self.menu_screen
 
+        self._config = config.ConfigLoader()
+
     def run(self):
         """Запуск основного цикла игры."""
         while True:
-        # Отслеживание событий клавиатуры и мыши.
+            # Mouse and keyboard events handling
             self.active_screen._check_events()
             self.active_screen._update_screen()
             # Отображение последнего прорисованного экрана.
             pygame.display.flip()
 
-            self.clock.tick(20)
+            fps = self._config['FPS']
+            self.clock.tick(fps)
 
 
 if __name__ == '__main__':

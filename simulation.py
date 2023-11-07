@@ -2,7 +2,7 @@ import itertools
 
 import numpy as np
 from numpy import ndarray
-# from typing import Tuple, List
+from typing import Tuple
 
 
 class Simulation:
@@ -17,16 +17,10 @@ class Simulation:
         self._R = R
         self._R_spring = R_spring
         self._r = np.hstack([r_spring, r])
-        # self._r_spring = r_spring
         self._v = np.hstack([v_spring, v])
-        # self._v_spring = v_spring
         self._m = np.hstack([m_spring, m])
-        # self._m_spring = m_spring
         self._n_particles = r.shape[1]
         self._n_spring = r_spring.shape[1]
-
-        # ids = np.arange(self._n_particles + self._n_spring)
-        # self._ids_pairs = np.asarray(list(itertools.combinations(ids, 2)))
 
         spring_ids = np.arange(self._n_spring)
         self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))
@@ -39,26 +33,13 @@ class Simulation:
     def __iter__(self):
         return self
 
-    def __next__(self):
-        # n_particles = self._n_particles
-        # n_spring = self._n_spring
-        #
-        # new_r = np.random.uniform(size=(2, n_particles))
-        # new_v = np.random.uniform(size=(2, n_particles))
-        # new_r_spr = np.random.uniform(size=(2, n_spring))
-        # new_v_spr = np.random.uniform(size=(2, n_spring))
-        # new_f = np.random.uniform()
-        #
-        # return new_r, new_r_spr, new_v, new_v_spr, new_f
-
+    def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
         f = self.motion(dt=0.000008)
 
         return self.r, self.r_spring, self.v, self.v_spring, f
 
     @property
     def T(self) -> float:
-        # raise NotImplemented
-        # return self._T
         return np.mean(((np.linalg.norm(self._v, axis=0) ** 2) * self._m)) / (2 * self._k_boltz)
 
     @T.setter
@@ -148,7 +129,7 @@ class Simulation:
         return dx ** 2 + dy ** 2
 
     @staticmethod
-    def compute_new_v(v1, v2, r1, r2, m1, m2):
+    def compute_new_v(v1, v2, r1, r2, m1, m2) -> Tuple[ndarray, ndarray]:
         m_s = m1 + m2
         dr = r1 - r2
         dr_norm_sq = np.linalg.norm(dr, axis=0) ** 2
@@ -159,8 +140,6 @@ class Simulation:
         return v1new, v2new
 
     def motion(self, dt) -> float:
-        # ic = self._ids_pairs[self.get_deltad2_pairs(self._r, self._ids_pairs) < self.R ** 2]
-
         ic_spring = self._spring_ids_pairs[
             np.asarray(self.get_deltad2_pairs(self._r, self._spring_ids_pairs)).reshape((1, ))
             < (2 * self.R_spring) ** 2]
@@ -184,7 +163,6 @@ class Simulation:
         )
 
         dr = self.r_spring[:, 0] - self.r_spring[:, 1]
-        # dr_sc = dr.norm()
         dr_sc = np.linalg.norm(dr)
         dx = dr * (1 - self.l_0 / dr_sc)
         dx_norm = np.abs(dr_sc - self.l_0)
@@ -263,6 +241,3 @@ class Simulation:
             self._m[0:self._n_spring] = m_spring
         if particles_cnt is not None:
             self._set_particles_cnt(particles_cnt)
-
-# video:
-# https://youtu.be/iSEAidM-DDI?si=TdfkNox4gglKLRd3

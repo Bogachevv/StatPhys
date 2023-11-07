@@ -3,6 +3,8 @@ import screeninfo
 from menu_screen import MenuScreen
 from authors_screen import AuthorsScreen
 from demo_screen import DemoScreen
+
+
 class App:
     def __init__(self):
         pygame.init()

@@ -34,6 +34,8 @@ class Demo:
             m=m, m_spring=m_spring,
         )
 
+        self.simulation.T = params['T']
+
     def set_params(self, params, par):
         if par == 'gamma':
             self.simulation.set_params(gamma=params['gamma'])

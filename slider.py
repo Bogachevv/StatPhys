@@ -2,17 +2,32 @@ from pygame_widgets.slider import Slider
 from button import Button
 import pygame
 
-class Param_Slider:
+
+class ParamSlider:
     def __init__(self, app, name, position, bounds, step, name_par, dec_number, **kwargs):
         self.name_par = name_par
         self.dec_round = lambda x: int(x) if dec_number == 0 else round(x, dec_number)
-        #self.init_values = {'slider': [250, 15], 'sl_value': {'offset': [50, 4], 'size': (30, 25)}, 'par_name': {'offset': [280, 9], 'size': (50, 30)}}
-        self.init_values = {'slider': [250, 15], 'sl_value': {'offset': [200, 9], 'size': (30, 25)}, 'par_name': {'offset': [430, 14], 'size': (50, 30)}}
-        self.slider = Slider(app.screen, *position, *self.init_values['slider'], curved=False, min=bounds[0], max=bounds[1], step = step)
-        self.sl_val = Button(app, str(self.slider.getValue()), list((position[i] - self.init_values['sl_value']['offset'][i] for i in range(2))), self.init_values['sl_value']['size'], **kwargs)
-        self.par_name = Button(app, name, list((position[i] - self.init_values['par_name']['offset'][i] for i in range(2))), self.init_values['par_name']['size'], **kwargs)
+        self.init_values = {
+            'slider': [250, 15],
+            'sl_value': {
+                'offset': [200, 9],
+                'size': (30, 25)
+            },
+            'par_name': {
+                'offset': [430, 14],
+                'size': (50, 30)
+            }
+        }
 
-    
+        self.slider = _SliderImpl(app, position, self.init_values['slider'], 0.5, bounds[0], bounds[1])
+
+        self.sl_val = Button(app, str(self.slider.getValue()),
+                             list((position[i] - self.init_values['sl_value']['offset'][i] for i in range(2))),
+                             self.init_values['sl_value']['size'], **kwargs)
+        self.par_name = Button(app, name,
+                               list((position[i] - self.init_values['par_name']['offset'][i] for i in range(2))),
+                               self.init_values['par_name']['size'], **kwargs)
+
     def draw_check(self, params):
         self.slider.draw()
         val = self.dec_round(self.slider.getValue())
@@ -20,14 +35,15 @@ class Param_Slider:
         self.sl_val._prep_msg(str(val))
         self.sl_val.draw_button()
         self.par_name.draw_button()
-    
+
     def getValue(self):
         return self.dec_round(self.slider.getValue())
-    
+
+
 BUTTONSTATES = {True: 'white', False: (100, 100, 100)}
 
 
-class Slidertest:
+class _SliderImpl:
     def __init__(self, app, pos: tuple, size: tuple, initial_val: float, min: int, max: int) -> None:
         self.pos = pos
         self.size = size
@@ -35,17 +51,18 @@ class Slidertest:
         self.grabbed = False
         self.screen = app.screen
 
-        self.slider_left_pos = self.pos[0] - (size[0]//2)
-        self.slider_right_pos = self.pos[0] + (size[0]//2)
-        self.slider_top_pos = self.pos[1] - (size[1]//2)
+        self.slider_left_pos = self.pos[0] - (size[0] // 2)
+        self.slider_right_pos = self.pos[0] + (size[0] // 2)
+        self.slider_top_pos = self.pos[1] - (size[1] // 2)
 
         self.min = min
         self.max = max
-        self.initial_val = (self.slider_right_pos-self.slider_left_pos)*initial_val # <- percentage
+        self.initial_val = (self.slider_right_pos - self.slider_left_pos) * initial_val  # <- percentage
 
         self.container_rect = pygame.Rect(self.slider_left_pos, self.slider_top_pos, self.size[0], self.size[1])
-        self.button_rect = pygame.Rect(self.slider_left_pos + self.initial_val - 10, self.slider_top_pos, 20, self.size[1])
-        
+        self.button_rect = pygame.Rect(self.slider_left_pos + self.initial_val - 10, self.slider_top_pos, 20,
+                                       self.size[1])
+
     def move_slider(self, mouse_pos):
         pos = mouse_pos[0]
         if pos < self.slider_left_pos:
@@ -53,20 +70,16 @@ class Slidertest:
         if pos > self.slider_right_pos:
             pos = self.slider_right_pos
         self.button_rect.centerx = pos
+
     def hover(self):
         self.hovered = True
+
     def draw(self):
         pygame.draw.rect(self.screen, "darkgray", self.container_rect)
         pygame.draw.rect(self.screen, BUTTONSTATES[self.hovered], self.button_rect)
+
     def getValue(self):
         val_range = self.slider_right_pos - self.slider_left_pos - 1
         button_val = self.button_rect.centerx - self.slider_left_pos
 
-        return (button_val/val_range)*(self.max-self.min)+self.min
-
-
-class SliderTest(Param_Slider):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.slider = Slidertest(args[0], args[2], self.init_values['slider'], 0.5, args[3][0], args[3][1])
-        
+        return (button_val / val_range) * (self.max - self.min) + self.min

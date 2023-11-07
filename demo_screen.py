@@ -23,14 +23,23 @@ class DemoScreen:
 
         param_names, sliders_gap, param_poses, param_bounds, param_step, par4sim, dec_numbers = self._load_params()
 
-        self.sliders = [SliderTest(app, name, pos, bounds, step, name_par, dec_number, button_color=self.bg_color, font='sans', bold=False, fontSize=25)
-                         for name, pos, bounds, step, name_par, dec_number in zip(param_names, param_poses, param_bounds, param_step, par4sim, dec_numbers)]
-        self.demo = Demo(app, (170, 50), (600, 600), (255, 255, 255), (100, 100, 100), self.bg_color, {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)})
-        
-        self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)}, 'kinetic': 0, 'potential': 0}
+        self.sliders = [
+            ParamSlider(app, name, pos, bounds, step, name_par, dec_number,
+                        button_color=self.bg_color, font='sans',
+                        bold=False, fontSize=25
+                        )
+            for name, pos, bounds, step, name_par, dec_number in
+            zip(param_names, param_poses, param_bounds, param_step, par4sim, dec_numbers)
+        ]
 
-        self.graphics = [Chart(self.app,'kinetic', (100, 670), (500, 400), (100, 100, 100)),
-                         Chart(self.app,'potential', (650, 670), (500, 400), (100, 100, 100))]
+        self.demo = Demo(app, (170, 50), (600, 600), (255, 255, 255), (100, 100, 100), self.bg_color,
+                         {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)})
+
+        self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)}, 'kinetic': 0,
+                            'potential': 0}
+
+        self.graphics = [Chart(self.app, 'kinetic', (100, 670), (500, 400), (100, 100, 100)),
+                         Chart(self.app, 'potential', (650, 670), (500, 400), (100, 100, 100))]
 
         self.slider_grabbed = False
 
@@ -51,7 +60,7 @@ class DemoScreen:
         dec_numbers = [1, 0, 0, 0, 1, 0]
 
         return param_names, sliders_gap, param_poses, param_bounds, param_step, par4sim, dec_numbers
-    
+
     def _update_screen(self):
         self.screen.fill(self.bg_color)
         self.demo.draw_check(self.demo_params)
@@ -60,7 +69,7 @@ class DemoScreen:
         for slider in self.sliders:
             slider.draw_check(self.demo_params['params'])
         self._draw_figures()
-    
+
     def _check_events(self):
         events = pygame.event.get()
         for event in events:
@@ -69,28 +78,28 @@ class DemoScreen:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
                 self._check_buttons(mouse_position)
-            
+
             mouse_pos = pygame.mouse.get_pos()
             mouse = pygame.mouse.get_pressed()
             self._check_sliders(mouse_pos, mouse)
-        #pygame_widgets.update(events)
+        # pygame_widgets.update(events)
 
     def _check_sliders(self, mouse_position, mouse_pressed):
         for slider in self.sliders:
-                if slider.slider.button_rect.collidepoint(mouse_position):
-                    if mouse_pressed[0] and not self.slider_grabbed:
-                        slider.slider.grabbed = True
-                        self.slider_grabbed = True
-                if not mouse_pressed[0]:
-                    slider.slider.grabbed = False
-                    self.slider_grabbed = False
-                if slider.slider.button_rect.collidepoint(mouse_position):  
-                    slider.slider.hover()
-                if slider.slider.grabbed:
-                    slider.slider.move_slider(mouse_position)
-                    slider.slider.hover()
-                else:
-                    slider.slider.hovered = False
+            if slider.slider.button_rect.collidepoint(mouse_position):
+                if mouse_pressed[0] and not self.slider_grabbed:
+                    slider.slider.grabbed = True
+                    self.slider_grabbed = True
+            if not mouse_pressed[0]:
+                slider.slider.grabbed = False
+                self.slider_grabbed = False
+            if slider.slider.button_rect.collidepoint(mouse_position):
+                slider.slider.hover()
+            if slider.slider.grabbed:
+                slider.slider.move_slider(mouse_position)
+                slider.slider.hover()
+            else:
+                slider.slider.hovered = False
 
     def _check_buttons(self, mouse_position):
         for index, button in enumerate(self.buttons):

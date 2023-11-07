@@ -5,6 +5,7 @@ from simulation import Simulation
 R_SIZE = 0.01
 R_MASS = 10e-5
 
+
 class Demo:
     def __init__(self, app, position, demo_size, bg_color, border_color, bg_screen_color, params):
         self.screen = app.screen
@@ -15,14 +16,8 @@ class Demo:
         self.main = pygame.Rect(*position, *demo_size)
         self.size = demo_size[0]
         self.pos_start = position[0], position[1] + self.size
-
-
         self.params = params
-        # self.simulation = Simulation(1, params['k'], params['l_0'], params['R'] / 1000, 0.05,
-        #                              r_init, np.random.uniform(size=(2, 2)),
-        #                              np.random.uniform(size=(2, int(params['r']))), np.random.uniform(size=(2, 2)),
-        #                              np.full((int(params['r']), ), 10 ** (-5)),
-        #                              np.full((2, ), params['m_spring'] * (10 ** (-5))))
+
         r_init = np.random.uniform(size=(2, params['r'] + 2))
         v_init = np.random.uniform(low=-500, high=500, size=(2, params['r'] + 2))
         m = np.ones((params['r'] + 2, )) * R_MASS

@@ -1,14 +1,15 @@
 import itertools
-
 import numpy as np
 from numpy import ndarray
 from typing import Tuple
+from scipy import stats
+import warnings
 
 
 class Simulation:
     def __init__(self, gamma: float, k: float, l_0: float, R: float, R_spring: float,
-                 r: ndarray, r_spring: ndarray,
-                 v: ndarray, v_spring: ndarray,
+                 particles_cnt: int, spring_cnt: int,
+                 T: float,
                  m: ndarray, m_spring: ndarray):
         self._k_boltz = 1.380 * 1e-2
         self._gamma = gamma
@@ -16,11 +17,12 @@ class Simulation:
         self._l_0 = l_0
         self._R = R
         self._R_spring = R_spring
-        self._r = np.hstack([r_spring, r])
-        self._v = np.hstack([v_spring, v])
+        self._r = np.random.uniform(size=(2, spring_cnt + particles_cnt))
+        warnings.warn("T setter may be implemented incorrect")
+        self._v = stats.maxwell.rvs(loc=0.0, scale=self._k_boltz*T, size=(2, spring_cnt + particles_cnt))
         self._m = np.hstack([m_spring, m])
-        self._n_particles = r.shape[1]
-        self._n_spring = r_spring.shape[1]
+        self._n_particles = particles_cnt
+        self._n_spring = spring_cnt
 
         spring_ids = np.arange(self._n_spring)
         self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))

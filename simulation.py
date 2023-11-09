@@ -32,11 +32,15 @@ class Simulation:
 
         self._spring_particles_ids_paris = np.asarray(list(itertools.product(spring_ids, particles_ids)))
 
+        self._available_spring_ids_pairs = self._spring_ids_pairs.copy()
+        self._available_particles_ids_pairs = self._particles_ids_pairs.copy()
+        self._available_spring_particles_ids_paris = self._spring_particles_ids_paris.copy()
+
     def __iter__(self):
         return self
 
     def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
-        f = self.motion(dt=0.000008)
+        f = self.motion(dt=0.000025)
 
         return self.r, self.r_spring, self.v, self.v_spring, f
 
@@ -141,22 +145,50 @@ class Simulation:
 
         return v1new, v2new
 
+    @staticmethod
+    def _update_available(arr: ndarray, sub_arr: ndarray) -> ndarray:
+        eq_mat = sub_arr.T[None, ...] == arr[..., None]
+        na_idx = np.any(np.all(eq_mat, axis=1), axis=1)
+        return arr[~na_idx, :]
+
     def motion(self, dt) -> float:
-        ic_spring = self._spring_ids_pairs[
-            np.asarray(self.get_deltad2_pairs(self._r, self._spring_ids_pairs)).reshape((1, ))
-            < (2 * self.R_spring) ** 2]
+        if self._available_spring_ids_pairs.shape[0]:
+            ic_spring = self._available_spring_ids_pairs[
+                np.array([self.get_deltad2_pairs(self._r, self._available_spring_ids_pairs)])
+                < (2 * self.R_spring) ** 2]
+        else:
+            ic_spring = np.zeros((0, 2), dtype=int)
 
-        ic_particles = self._particles_ids_pairs[
-            self.get_deltad2_pairs(self._r, self._particles_ids_pairs) < (2 * self.R) ** 2]
+        if self._available_particles_ids_pairs.shape[0]:
+            ic_particles = self._available_particles_ids_pairs[
+                self.get_deltad2_pairs(self._r, self._available_particles_ids_pairs) < (2 * self.R) ** 2]
+        else:
+            ic_particles = np.zeros((0, 2), dtype=int)
 
-        ic_spring_particles = self._spring_particles_ids_paris[
-            self.get_deltad2_pairs(self._r, self._spring_particles_ids_paris) < (self.R + self.R_spring) ** 2]
+        if self._available_spring_particles_ids_paris.shape[0]:
+            ic_spring_particles = self._available_spring_particles_ids_paris[
+                self.get_deltad2_pairs(self._r, self._available_spring_particles_ids_paris) < (self.R + self.R_spring) ** 2]
+        else:
+            ic_spring_particles = np.zeros((0, 2), dtype=int)
+
+        self._available_spring_ids_pairs = self._update_available(
+            self._spring_ids_pairs, ic_spring
+        )
+
+        self._available_particles_ids_pairs = self._update_available(
+            self._particles_ids_pairs, ic_particles
+        )
+
+        self._available_spring_particles_ids_paris = self._update_available(
+            self._spring_particles_ids_paris, ic_spring_particles
+        )
 
         ic = np.vstack([
             ic_spring,
             ic_particles,
             ic_spring_particles
         ])
+        # print(f"DEBUG: {ic.shape}")
 
         self._v[:, ic[:, 0]], self._v[:, ic[:, 1]] = self.compute_new_v(
             self._v[:, ic[:, 0]], self._v[:, ic[:, 1]],

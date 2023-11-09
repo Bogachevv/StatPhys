@@ -241,3 +241,9 @@ class Simulation:
             self._m[0:self._n_spring] = m_spring
         if particles_cnt is not None:
             self._set_particles_cnt(particles_cnt)
+
+    def expected_potential_energy(self) -> float:
+        return 1.0
+
+    def expected_kinetic_energy(self) -> float:
+        return 2.0

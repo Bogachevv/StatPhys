@@ -155,19 +155,19 @@ class Simulation:
                 np.array([self.get_deltad2_pairs(self._r, self._available_spring_ids_pairs)])
                 < (2 * self.R_spring) ** 2]
         else:
-            ic_spring = np.zeros((0, 2))
+            ic_spring = np.zeros((0, 2), dtype=int)
 
         if self._available_particles_ids_pairs.shape[0]:
             ic_particles = self._available_particles_ids_pairs[
                 self.get_deltad2_pairs(self._r, self._available_particles_ids_pairs) < (2 * self.R) ** 2]
         else:
-            ic_particles = np.zeros((0, 2))
+            ic_particles = np.zeros((0, 2), dtype=int)
 
         if self._available_spring_particles_ids_paris.shape[0]:
             ic_spring_particles = self._available_spring_particles_ids_paris[
                 self.get_deltad2_pairs(self._r, self._available_spring_particles_ids_paris) < (self.R + self.R_spring) ** 2]
         else:
-            ic_spring_particles = np.zeros((0, 2))
+            ic_spring_particles = np.zeros((0, 2), dtype=int)
 
         self._available_spring_ids_pairs = self._update_available(
             self._spring_ids_pairs, ic_spring
@@ -186,6 +186,7 @@ class Simulation:
             ic_particles,
             ic_spring_particles
         ])
+        # print(f"DEBUG: {ic.shape}")
 
         self._v[:, ic[:, 0]], self._v[:, ic[:, 1]] = self.compute_new_v(
             self._v[:, ic[:, 0]], self._v[:, ic[:, 1]],

@@ -45,6 +45,9 @@ class Simulation:
     def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
         f = self.motion(dt=0.00001)
 
+        self._potential_energy.append(self.calc_potential_energy())
+        self._kinetic_energy.append(self.calc_potential_energy())
+
         return self.r, self.r_spring, self.v, self.v_spring, f
 
     @property

@@ -8,6 +8,7 @@ pygame = "*"
 autopep8 = "*"
 numpy = "*"
 screeninfo = "*"
+configloader = "*"
 
 [dev-packages]
 

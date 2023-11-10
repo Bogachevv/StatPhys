@@ -9,13 +9,20 @@ class ListBuff:
         self.buff = [0] * size
         self.main = []
         self.ind = 0
-
+    
     def append(self, other):
         self.buff[self.ind] = other
         self.ind += 1
         if self.ind == self.size:
             self.main.append(sum(self.buff) / self.size)
             self.ind = 0
+    
+    def extend(self, other):
+        for item in other:
+            # -1 means end of the buffer
+            if item == -1:
+                break
+            self.append(item)
 
     def __len__(self):
         return len(self.main)
@@ -43,7 +50,7 @@ class Chart:
         self.const_buf = [new_val] * len(self.buf) if new_val else None
 
     def draw(self, params):
-        self.buf.append(params[self.name])
+        self.buf.extend(params[self.name])
         if len(self.buf) > 1:
             self.chart.add_title(f'{self.name}_energy')
             self.chart.add_legend()

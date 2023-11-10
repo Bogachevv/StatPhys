@@ -38,9 +38,10 @@ class DemoScreen:
         self.demo = Demo(app, (170, 50), (600, 600), (255, 255, 255), (100, 100, 100), self.bg_color,
                          {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)})
 
-        self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim[:-1], self.sliders[:-1])}, 'kinetic': [0] * param_bounds[-1][1],
-                            'potential': [0] * param_bounds[-1][1], 'speed': self.sliders[-1].getValue()}
+        self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)}, 'kinetic': [0] * param_bounds[-1][1],
+                            'potential': [0] * param_bounds[-1][1]}
 
+        print(self.demo_params)
         buf_len = config.ConfigLoader()['buf_len']
         self.graphics = [Chart(self.app, 'kinetic', (100, 670), (500, 400), (100, 100, 100),
                                len_buf=buf_len, const_legend='theoretical kinetic', const_func=self.demo.simulation.expected_kinetic_energy),
@@ -72,7 +73,7 @@ class DemoScreen:
         self.demo.draw_check(self.demo_params)
         for button in self.buttons:
             button.draw_button()
-        for slider in self.sliders[:-1]:
+        for slider in self.sliders:
             slider.draw_check(self.demo_params['params'])
         self._draw_figures()
 

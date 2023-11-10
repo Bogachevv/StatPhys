@@ -1,9 +1,8 @@
 import itertools
 import numpy as np
 from numpy import ndarray
-from typing import Tuple
+from typing import Tuple, Union
 from scipy import stats
-import warnings
 
 
 class Simulation:
@@ -18,8 +17,9 @@ class Simulation:
         self._R = R
         self._R_spring = R_spring
         self._r = np.random.uniform(size=(2, spring_cnt + particles_cnt))
-        warnings.warn("T setter may be implemented incorrect")
-        self._v = stats.maxwell.rvs(loc=0.0, scale=self._k_boltz*T, size=(2, spring_cnt + particles_cnt))
+        v = stats.norm.rvs(loc=0.0, scale=np.sqrt(self._k_boltz*T / m), size=(2, particles_cnt))
+        v_spring = stats.norm.rvs(loc=0.0, scale=np.sqrt(self._k_boltz * T / m_spring), size=(2, spring_cnt))
+        self._v = np.hstack([v_spring, v])
         self._m = np.hstack([m_spring, m])
         self._n_particles = particles_cnt
         self._n_spring = spring_cnt
@@ -36,11 +36,14 @@ class Simulation:
         self._available_particles_ids_pairs = self._particles_ids_pairs.copy()
         self._available_spring_particles_ids_paris = self._spring_particles_ids_paris.copy()
 
+        self._potential_energy = []
+        self._kinetic_energy = []
+
     def __iter__(self):
         return self
 
     def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
-        f = self.motion(dt=0.000025)
+        f = self.motion(dt=0.00001)
 
         return self.r, self.r_spring, self.v, self.v_spring, f
 
@@ -118,15 +121,6 @@ class Simulation:
     @property
     def m_spring(self) -> ndarray:
         return self._m[:self._n_spring]
-
-    def calc_kinetic_energy(self) -> float:
-        return np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
-
-    def calc_potential_energy(self) -> float:
-        dr = self.r_spring[:, 0] - self.r_spring[:, 1]
-        dr_sc = np.linalg.norm(dr)
-        dx_norm = np.abs(dr_sc - self.l_0)
-        return self._k * (dx_norm ** (self._gamma + 1)) / (self._gamma + 1)
 
     @staticmethod
     def get_deltad2_pairs(r, ids_pairs):
@@ -277,7 +271,37 @@ class Simulation:
             self._set_particles_cnt(particles_cnt)
 
     def expected_potential_energy(self) -> float:
-        return 1.0
+        return float((self._k_boltz * self.T) / (self.gamma + 1))
 
     def expected_kinetic_energy(self) -> float:
-        return 2.0
+        return float(self._k_boltz * self.T)
+
+    def calc_kinetic_energy(self) -> float:
+        return np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
+
+    def calc_potential_energy(self) -> float:
+        dr = self.r_spring[:, 0] - self.r_spring[:, 1]
+        dr_sc = np.linalg.norm(dr)
+        dx_norm = np.abs(dr_sc - self.l_0)
+        return self._k * (dx_norm ** (self._gamma + 1)) / (self._gamma + 1)
+
+    def mean_potential_energy(self, frames_c: Union[int, None] = None) -> float:
+        """
+        :param frames_c: if frames_c is None then the averaging is taken over all frames,
+        otherwise the averaging is taken over the last frame_c frames
+        """
+        if frames_c is None:
+            return float(np.mean(self._potential_energy))
+        else:
+            return float(np.mean(self._potential_energy[-frames_c:]))
+
+    def mean_kinetic_energy(self, frames_c: Union[int, None] = None) -> float:
+        """
+        :param frames_c: if frames_c is None then the averaging is taken over all frames,
+        otherwise the averaging is taken over the last frame_c frames
+        """
+        if frames_c is None:
+            return float(np.mean(self._kinetic_energy))
+        else:
+            return float(np.mean(self._kinetic_energy[-frames_c:]))
+

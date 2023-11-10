@@ -1,5 +1,6 @@
 import pygame
 import pygame_chart as pyc
+# from simulation import expected_potential_energy, expected_kinetic_energy
 
 
 class ListBuff:
@@ -22,7 +23,7 @@ class ListBuff:
 
 class Chart:
     def __init__(self, app, name, position, size, border_color, len_buf=10, bd_width=3,
-                 const_val=None, const_legend: str = None):
+                 const_val=None, const_legend: str = None, const_func = None):
         self.screen = app.screen
         self.name = name
         self.chart = pyc.Figure(self.screen, position[0], position[1], size[0], size[1])
@@ -31,6 +32,7 @@ class Chart:
         self.buf = ListBuff(len_buf)
         self.const_buf = [const_val] * len_buf if const_val else None
         self.const_legend = 'const' if const_legend is None else const_legend
+        self.const_func = const_func
 
     @property
     def const_val(self):
@@ -45,11 +47,10 @@ class Chart:
         if len(self.buf) > 1:
             self.chart.add_title(f'{self.name}_energy')
             self.chart.add_legend()
-            if self.const_buf:
-                self.chart.line(self.const_legend,
-                                list(range(1, len(self.buf) + 1)),
-                                [10] * len(self.buf),
-                                line_width=2)
+            self.chart.line(self.const_legend,
+                            list(range(1, len(self.buf) + 1)),
+                            [self.const_func()] * len(self.buf),
+                            line_width=2)
             self.chart.line(self.name, list(range(1, len(self.buf) + 1)), self.buf.main, line_width=3)
             self.chart.draw()
             pygame.draw.rect(self.screen, self.bd_params[0], self.border, self.bd_params[1])

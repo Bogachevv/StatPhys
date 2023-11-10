@@ -1,5 +1,4 @@
 import pygame
-import pygame_widgets
 from button import Button
 from slider import *
 from demo import Demo
@@ -39,14 +38,14 @@ class DemoScreen:
         self.demo = Demo(app, (170, 50), (600, 600), (255, 255, 255), (100, 100, 100), self.bg_color,
                          {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)})
 
-        self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)}, 'kinetic': 0,
-                            'potential': 0}
+        self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim[:-1], self.sliders[:-1])}, 'kinetic': [0] * param_bounds[-1][1],
+                            'potential': [0] * param_bounds[-1][1], 'speed': self.sliders[-1].getValue()}
 
         buf_len = config.ConfigLoader()['buf_len']
         self.graphics = [Chart(self.app, 'kinetic', (100, 670), (500, 400), (100, 100, 100),
-                               len_buf=buf_len, const_legend='theoretical kinetic'),
+                               len_buf=buf_len, const_legend='theoretical kinetic', const_func=self.demo.simulation.expected_kinetic_energy),
                          Chart(self.app, 'potential', (650, 670), (500, 400), (100, 100, 100),
-                               len_buf=buf_len, const_legend='theoretical potential')]
+                               len_buf=buf_len, const_legend='theoretical potential', const_func=self.demo.simulation.expected_potential_energy)]
 
         self.slider_grabbed = False
 
@@ -64,7 +63,7 @@ class DemoScreen:
         param_step = [round((b[1] - b[0]) / 100, 3) for b in param_bounds]
         param_step[1], param_step[2] = int(param_step[1]), int(param_step[2])
         par4sim = loader['par4sim']
-        dec_numbers = [1, 0, 0, 0, 1, 0]
+        dec_numbers = [1, 0, 0, 0, 1, 0, 0]
 
         return param_names, sliders_gap, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers
 
@@ -73,7 +72,7 @@ class DemoScreen:
         self.demo.draw_check(self.demo_params)
         for button in self.buttons:
             button.draw_button()
-        for slider in self.sliders:
+        for slider in self.sliders[:-1]:
             slider.draw_check(self.demo_params['params'])
         self._draw_figures()
 

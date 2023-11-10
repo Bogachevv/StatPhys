@@ -18,23 +18,21 @@ class Demo:
         self.pos_start = position[0], position[1] + self.size
         self.params = params
 
-        r_init = np.random.uniform(size=(2, params['r'] + 2))
-        v_init = np.random.uniform(low=-500, high=500, size=(2, params['r'] + 2))
+        # r_init = np.random.uniform(size=(2, params['r'] + 2))
+        # v_init = np.random.uniform(low=-500, high=500, size=(2, params['r'] + 2))
         m = np.ones((params['r'] + 2, )) * R_MASS
         m_spring = m[:2] * params['m_spring']
         m = m[2:]
-        r, r_spring = r_init[:, 2:], r_init[:, :2]
-        v, v_spring = v_init[:, 2:], v_init[:, :2]
+        # r, r_spring = r_init[:, 2:], r_init[:, :2]
+        # v, v_spring = v_init[:, 2:], v_init[:, :2]
         # Размер броуновских частиц
 
         self.simulation = Simulation(
-            gamma=params['gamma'], k=params['k'], l_0=0.1, R=R_SIZE, R_spring=R_SIZE * params['R'],
-            r=r, r_spring=r_spring,
-            v=v, v_spring=v_spring,
+            gamma=params['gamma'], k=params['k'], l_0=0.05, R=R_SIZE, R_spring=R_SIZE * params['R'],
+            particles_cnt=params['r'], spring_cnt=2,
+            T = params['T'],
             m=m, m_spring=m_spring,
         )
-
-        self.simulation.T = params['T']
 
     def set_params(self, params, par):
         if par == 'gamma':

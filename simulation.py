@@ -28,6 +28,16 @@ class Simulation:
         self._n_particles = particles_cnt
         self._n_spring = spring_cnt
 
+        self._init_ids_pairs()
+
+        self._potential_energy = []
+        self._kinetic_energy = []
+
+        self._E_full = self.calc_full_energy()
+        self._T_tar = self.T
+        self._frame_no = 1
+
+    def _init_ids_pairs(self):
         spring_ids = np.arange(self._n_spring)
         self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))
 
@@ -39,13 +49,6 @@ class Simulation:
         self._available_spring_ids_pairs = self._spring_ids_pairs.copy()
         self._available_particles_ids_pairs = self._particles_ids_pairs.copy()
         self._available_spring_particles_ids_paris = self._spring_particles_ids_paris.copy()
-
-        self._potential_energy = []
-        self._kinetic_energy = []
-
-        self._E_full = self.calc_full_energy()
-        self._T_tar = self.T
-        self._frame_no = 1
 
     @staticmethod
     def _sample_r_sping(spring_cnt: int, k: float, k_boltz: float, l_0: float, gamma: float, T: float):
@@ -286,15 +289,7 @@ class Simulation:
             )
 
         if particles_cnt != self._n_particles:
-            self._n_particles = particles_cnt
-
-            spring_ids = np.arange(self._n_spring)
-            self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))
-
-            particles_ids = np.arange(self._n_particles) + self._n_spring
-            self._particles_ids_pairs = np.asarray(list(itertools.combinations(particles_ids, 2)))
-
-            self._spring_particles_ids_paris = np.asarray(list(itertools.product(spring_ids, particles_ids)))
+            self._init_ids_pairs()
 
         self._E_full = self.calc_full_energy()
         self._T_tar = self.T

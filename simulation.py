@@ -2,7 +2,8 @@ import itertools
 import numpy as np
 from numpy import ndarray
 from typing import Tuple, Union
-from scipy import stats
+from scipy import stats, integrate
+from bisect import bisect_left
 
 
 class Simulation:
@@ -16,7 +17,9 @@ class Simulation:
         self._l_0 = l_0
         self._R = R
         self._R_spring = R_spring
-        self._r = np.random.uniform(size=(2, spring_cnt + particles_cnt))
+        r = np.random.uniform(size=(2, particles_cnt))
+        r_spring = Simulation._sample_r_sping(spring_cnt, k, self._k_boltz, l_0, gamma, T)
+        self._r = np.hstack([r_spring, r])
         v = stats.norm.rvs(loc=0.0, scale=np.sqrt(self._k_boltz*T / m), size=(2, particles_cnt))
         v_spring = stats.norm.rvs(loc=0.0, scale=np.sqrt(self._k_boltz * T / m_spring), size=(2, spring_cnt))
         self._v = np.hstack([v_spring, v])
@@ -39,6 +42,29 @@ class Simulation:
         self._potential_energy = []
         self._kinetic_energy = []
 
+    @staticmethod
+    def _sample_r_sping(spring_cnt: int, k: float, k_boltz: float, l_0: float, gamma: float, T: float):
+        assert spring_cnt == 2, "Not implemented"
+
+        def f(l):
+            return np.exp(-k * (np.abs(l - l_0) ** (gamma + 1)) / (2 * k_boltz * T * (gamma + 1)))
+
+        r_sp = np.linspace(0, 0.9, num=10_000)
+        F = integrate.cumulative_trapezoid(y=f(r_sp), x=r_sp, initial=0)
+        const = F[-1]
+        F /= const
+
+        un = np.random.rand(1)
+        l_between = r_sp[bisect_left(F, un)]
+
+        print(f"{l_between=}")
+
+        r_0 = np.random.normal(0.5, 0.25, size=(2, ))
+        phi = np.random.rand() * 2*np.pi
+        r_1 = r_0 + l_between * np.array([np.cos(phi), np.sin(phi)])
+
+        return np.vstack([r_0, r_1]).T
+
     def __iter__(self):
         return self
 
@@ -48,6 +74,9 @@ class Simulation:
         self._potential_energy.append(self.calc_potential_energy())
         self._kinetic_energy.append(self.calc_potential_energy())
 
+        # with open("T_dump_2.txt", "a") as fl:
+        #     print(f"{self.T:.4f}", file=fl)
+        #
         return self.r, self.r_spring, self.v, self.v_spring, f
 
     @property
@@ -281,6 +310,11 @@ class Simulation:
 
     def calc_kinetic_energy(self) -> float:
         return np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
+
+    def calc_full_kinetic_energy(self):
+        E_spring = np.sum((np.linalg.norm(self.v_spring, axis=0) ** 2)) * self.m_spring / 2
+        E_particles = np.sum((np.linalg.norm(self.v, axis=0) ** 2)) * self.m / 2
+        return float(E_spring + E_particles)
 
     def calc_potential_energy(self) -> float:
         dr = self.r_spring[:, 0] - self.r_spring[:, 1]

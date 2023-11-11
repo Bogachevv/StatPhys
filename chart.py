@@ -1,5 +1,6 @@
 import pygame
 import pygame_chart as pyc
+import gc
 # from simulation import expected_potential_energy, expected_kinetic_energy
 
 
@@ -9,13 +10,25 @@ class ListBuff:
         self.buff = [0] * size
         self.main = []
         self.ind = 0
-
+    
     def append(self, other):
         self.buff[self.ind] = other
         self.ind += 1
         if self.ind == self.size:
             self.main.append(sum(self.buff) / self.size)
             self.ind = 0
+    
+    def extend(self, other):
+        for item in other:
+            # -1 means end of the buffer
+            if item == -1:
+                break
+            self.append(item)
+    
+    def refresh(self):
+        self.main = []
+        self.buff = [0] * self.size
+        gc.collect()
 
     def __len__(self):
         return len(self.main)
@@ -43,7 +56,8 @@ class Chart:
         self.const_buf = [new_val] * len(self.buf) if new_val else None
 
     def draw(self, params):
-        self.buf.append(params[self.name])
+        self.buf.extend(params[self.name])
+        self._refresh_iter(params)
         if len(self.buf) > 1:
             self.chart.add_title(f'{self.name}_energy')
             self.chart.add_legend()
@@ -54,3 +68,7 @@ class Chart:
             self.chart.line(self.name, list(range(1, len(self.buf) + 1)), self.buf.main, line_width=3)
             self.chart.draw()
             pygame.draw.rect(self.screen, self.bd_params[0], self.border, self.bd_params[1])
+    
+    def _refresh_iter(self, params):
+        if params['is_changed']:
+            self.buf.refresh()

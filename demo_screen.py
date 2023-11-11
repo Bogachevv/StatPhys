@@ -40,9 +40,10 @@ class DemoScreen:
         self.demo = Demo(app, (30, 30), (app.monitor.width * 0.43, app.monitor.width * 0.43), (255, 255, 255), (100, 100, 100), self.bg_color,
                          {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)})
 
-        self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim[:-1], self.sliders[:-1])}, 'kinetic': [0] * param_bounds[-1][1],
-                            'potential': [0] * param_bounds[-1][1], 'speed': self.sliders[-1].getValue()}
+        self.demo_config = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)}, 'kinetic': [0] * param_bounds[-1][1],
+                            'potential': [0] * param_bounds[-1][1], 'is_changed': False}
 
+        print(self.demo_config)
         buf_len = config.ConfigLoader()['buf_len']
         self.graphics = [Chart(self.app, 'kinetic', (app.monitor.width * 0.45 + 30, app.monitor.height * 0.30), (800, 330), (100, 100, 100),
                                len_buf=buf_len, const_legend='theoretical kinetic', const_func=self.demo.simulation.expected_kinetic_energy),
@@ -71,11 +72,11 @@ class DemoScreen:
 
     def _update_screen(self):
         self.screen.fill(self.bg_color)
-        self.demo.draw_check(self.demo_params)
+        self.demo.draw_check(self.demo_config)
         for button in self.buttons:
             button.draw_button()
-        for slider in self.sliders[:-1]:
-            slider.draw_check(self.demo_params['params'])
+        for slider in self.sliders:
+            slider.draw_check(self.demo_config['params'])
         self._draw_figures()
 
     def _check_events(self):
@@ -117,7 +118,9 @@ class DemoScreen:
 
     def _draw_figures(self):
         for fig in self.graphics:
-            fig.draw(self.demo_params)
+            fig.draw(self.demo_config)
+        # Part of refreshing charts feature.
+        self.demo_config['is_changed'] = False
 
 
 def _init_val_into_unit(initial_val, bounds) -> float:

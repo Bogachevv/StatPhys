@@ -54,16 +54,23 @@ class Demo:
         for i, par1, par2 in zip(range(len(self.params)), params['params'].values(), self.params.values()):
             if abs(par1 - par2) > 1e-4:
                 modified_par = list(self.params.keys())[i]
+                params['is_changed'] = True
                 break
 
         if modified_par is not None:
             self.set_params(params['params'], modified_par)
             self.params[modified_par] = params['params'][modified_par]
 
-        new_args = next(self.simulation)
+        for i in range(params['params']['speed']):
+            new_args = next(self.simulation)
+            params['kinetic'][i] = self.simulation.calc_kinetic_energy().item()
+            params['potential'][i] = self.simulation.calc_potential_energy().item()
+        for i in range(params['params']['speed'], len(params['kinetic'])):
+            params['kinetic'][i] = -1
+            params['potential'][i] = -1
 
-        params['kinetic'] = self.simulation.calc_kinetic_energy().item()
-        params['potential'] = self.simulation.calc_potential_energy().item()
+        # params['kinetic'] = self.simulation.calc_kinetic_energy().item()
+        # params['potential'] = self.simulation.calc_potential_energy().item()
 
         r, r_spring = new_args[0].copy(), new_args[1].copy()
         r_radius = self.size * self.simulation.R

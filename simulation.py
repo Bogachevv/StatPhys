@@ -43,8 +43,6 @@ class Simulation:
         self._potential_energy = []
         self._kinetic_energy = []
 
-        warnings.warn("E_full not computes after T changes")
-
         self._E_full = self.calc_full_energy()
         self._T_tar = self.T
         self._frame_no = 1
@@ -101,8 +99,10 @@ class Simulation:
     def T(self, val: float):
         if val <= 0:
             raise ValueError("T  must be > 0")
-        delta = val / self.T
+        delta = val / self._T_tar
         self._v *= np.sqrt(delta)
+        self._E_full = self.calc_full_energy()
+        self._T_tar = val
 
     @property
     def gamma(self) -> float:
@@ -111,6 +111,7 @@ class Simulation:
     @gamma.setter
     def gamma(self, val: float):
         self._gamma = val
+        self._E_full = self.calc_full_energy()
 
     @property
     def k(self) -> float:
@@ -119,6 +120,7 @@ class Simulation:
     @k.setter
     def k(self, val: float):
         self._k = val
+        self._E_full = self.calc_full_energy()
 
     @property
     def l_0(self) -> float:
@@ -127,6 +129,7 @@ class Simulation:
     @l_0.setter
     def l_0(self, val: float):
         self._l_0 = val
+        self._E_full = self.calc_full_energy()
 
     @property
     def R(self) -> float:
@@ -260,6 +263,9 @@ class Simulation:
         self._v = np.hstack([self._v, v])
         self._m = np.hstack([self._m, m])
 
+        self._E_full = self.calc_full_energy()
+        self._T_tar = self.T
+
     def _set_particles_cnt(self, particles_cnt: int):
         if particles_cnt < 0:
             raise ValueError("particles_cnt must be >= 0")
@@ -288,6 +294,9 @@ class Simulation:
 
             self._spring_particles_ids_paris = np.asarray(list(itertools.product(spring_ids, particles_ids)))
 
+        self._E_full = self.calc_full_energy()
+        self._T_tar = self.T
+
     def set_params(self,
                    gamma: float = None, k: float = None, l_0: float = None,
                    R: float = None, R_spring: float = None, T: float = None,
@@ -315,6 +324,9 @@ class Simulation:
             self._m[0:self._n_spring] = m_spring
         if particles_cnt is not None:
             self._set_particles_cnt(particles_cnt)
+
+        self._E_full = self.calc_full_energy()
+        self._T_tar = self.T
 
     def expected_potential_energy(self) -> float:
         return float((self._k_boltz * self._T_tar) / (self.gamma + 1))

@@ -55,6 +55,7 @@ class Demo:
         for i, par1, par2 in zip(range(len(self.params)), params['params'].values(), self.params.values()):
             if abs(par1 - par2) > 1e-4:
                 modified_par = list(self.params.keys())[i]
+                params['is_changed'] = True
                 break
 
         if modified_par is not None:

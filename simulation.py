@@ -46,6 +46,7 @@ class Simulation:
         warnings.warn("E_full not computes after T changes")
 
         self._E_full = self.calc_full_energy()
+        self._T_tar = self.T
         self._frame_no = 1
 
     @staticmethod
@@ -81,14 +82,14 @@ class Simulation:
         self._potential_energy.append(self.calc_potential_energy())
         self._kinetic_energy.append(self.calc_potential_energy())
 
-        with open("E_dump.txt", "a") as fl:
-            print(f"{self.calc_full_kinetic_energy() + self.calc_potential_energy()*2:.4f}", file=fl)
-
-        with open("T_dump.txt", "a") as fl:
-            print(f"{self.T:5.2f}", file=fl)
-
         if self._frame_no == 0:
             self._fix_energy()
+
+        # with open("E_dump.txt", "a") as fl:
+        #     print(f"{self.calc_full_energy():.4f}", file=fl)
+        #
+        # with open("T_dump.txt", "a") as fl:
+        #     print(f"{self.T:5.2f}", file=fl)
 
         return self.r, self.r_spring, self.v, self.v_spring, f
 
@@ -316,10 +317,10 @@ class Simulation:
             self._set_particles_cnt(particles_cnt)
 
     def expected_potential_energy(self) -> float:
-        return float((self._k_boltz * self.T) / (self.gamma + 1))
+        return float((self._k_boltz * self._T_tar) / (self.gamma + 1))
 
     def expected_kinetic_energy(self) -> float:
-        return float(self._k_boltz * self.T)
+        return float(self._k_boltz * self._T_tar)
 
     def calc_kinetic_energy(self) -> float:
         return np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
@@ -333,6 +334,7 @@ class Simulation:
         E_par = np.sum((np.linalg.norm(self.v, axis=0) ** 2) * self.m) / 2
         beta = (self._E_full - 2 * self.calc_potential_energy() - self._n_spring*self.calc_kinetic_energy()) / E_par
         self._v[:, self._n_spring:] *= np.sqrt(beta)
+        # print(f"DEBUG: {self._E_full - self.calc_full_energy()}")
 
     def calc_full_energy(self):
         return self.calc_full_kinetic_energy() + 2 * self.calc_potential_energy()
@@ -362,4 +364,3 @@ class Simulation:
             return float(np.mean(self._kinetic_energy))
         else:
             return float(np.mean(self._kinetic_energy[-frames_c:]))
-

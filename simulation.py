@@ -54,17 +54,19 @@ class Simulation:
         def f(l):
             return np.exp(-k * (np.abs(l - l_0) ** (gamma + 1)) / (2 * k_boltz * T * (gamma + 1)))
 
-        r_sp = np.linspace(0, 0.9, num=10_000)
+        r_sp = np.linspace(0, 0.5, num=10_000)
         F = integrate.cumulative_trapezoid(y=f(r_sp), x=r_sp, initial=0)
         const = F[-1]
         F /= const
+
+        print(f"{f(0.5)=}\t{f(1.0)=}")
 
         un = np.random.rand(1)
         l_between = r_sp[bisect_left(F, un)]
 
         print(f"{l_between=}")
 
-        r_0 = np.random.normal(0.5, 0.25, size=(2, ))
+        r_0 = np.array([0.5, 0.5])
         phi = np.random.rand() * 2*np.pi
         r_1 = r_0 + l_between * np.array([np.cos(phi), np.sin(phi)])
 

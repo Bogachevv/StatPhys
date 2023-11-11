@@ -4,6 +4,7 @@ from numpy import ndarray
 from typing import Tuple, Union
 from scipy import stats, integrate
 from bisect import bisect_left
+import warnings
 
 
 class Simulation:
@@ -42,6 +43,11 @@ class Simulation:
         self._potential_energy = []
         self._kinetic_energy = []
 
+        warnings.warn("E_full not computes after T changes")
+
+        self._E_full = self.calc_full_energy()
+        self._frame_no = 1
+
     @staticmethod
     def _sample_r_sping(spring_cnt: int, k: float, k_boltz: float, l_0: float, gamma: float, T: float):
         assert spring_cnt == 2, "Not implemented"
@@ -70,13 +76,20 @@ class Simulation:
 
     def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
         f = self.motion(dt=0.00001)
+        self._frame_no = (self._frame_no + 1) % 25
 
         self._potential_energy.append(self.calc_potential_energy())
         self._kinetic_energy.append(self.calc_potential_energy())
 
-        # with open("T_dump_2.txt", "a") as fl:
-        #     print(f"{self.T:.4f}", file=fl)
-        #
+        with open("E_dump.txt", "a") as fl:
+            print(f"{self.calc_full_kinetic_energy() + self.calc_potential_energy()*2:.4f}", file=fl)
+
+        with open("T_dump.txt", "a") as fl:
+            print(f"{self.T:5.2f}", file=fl)
+
+        if self._frame_no == 0:
+            self._fix_energy()
+
         return self.r, self.r_spring, self.v, self.v_spring, f
 
     @property
@@ -312,9 +325,17 @@ class Simulation:
         return np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
 
     def calc_full_kinetic_energy(self):
-        E_spring = np.sum((np.linalg.norm(self.v_spring, axis=0) ** 2)) * self.m_spring / 2
-        E_particles = np.sum((np.linalg.norm(self.v, axis=0) ** 2)) * self.m / 2
+        E_spring = np.sum((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
+        E_particles = np.sum((np.linalg.norm(self.v, axis=0) ** 2) * self.m) / 2
         return float(E_spring + E_particles)
+
+    def _fix_energy(self):
+        E_par = np.sum((np.linalg.norm(self.v, axis=0) ** 2) * self.m) / 2
+        beta = (self._E_full - 2 * self.calc_potential_energy() - self._n_spring*self.calc_kinetic_energy()) / E_par
+        self._v[:, self._n_spring:] *= np.sqrt(beta)
+
+    def calc_full_energy(self):
+        return self.calc_full_kinetic_energy() + 2 * self.calc_potential_energy()
 
     def calc_potential_energy(self) -> float:
         dr = self.r_spring[:, 0] - self.r_spring[:, 1]

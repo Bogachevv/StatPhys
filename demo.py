@@ -1,9 +1,7 @@
 import pygame
 import numpy as np
+import config
 from simulation import Simulation
-
-R_SIZE = 0.01
-R_MASS = 10e-5
 
 
 class Demo:
@@ -17,10 +15,11 @@ class Demo:
         self.size = demo_size[0]
         self.pos_start = position[0], position[1] + self.size
         self.params = params
+        loader = config.ConfigLoader()
 
         # r_init = np.random.uniform(size=(2, params['r'] + 2))
         # v_init = np.random.uniform(low=-500, high=500, size=(2, params['r'] + 2))
-        m = np.ones((params['r'] + 2, )) * R_MASS
+        m = np.ones((params['r'] + 2, )) * (loader["R_mass"])
         m_spring = m[:2] * params['m_spring']
         m = m[2:]
         # r, r_spring = r_init[:, 2:], r_init[:, :2]
@@ -28,7 +27,7 @@ class Demo:
         # Размер броуновских частиц
 
         self.simulation = Simulation(
-            gamma=params['gamma'], k=params['k'], l_0=0.05, R=R_SIZE, R_spring=R_SIZE * params['R'],
+            gamma=params['gamma'], k=params['k'], l_0=0.05, R=loader["R_size"], R_spring=loader["R_size"] * params['R'],
             particles_cnt=params['r'], spring_cnt=2,
             T = params['T'],
             m=m, m_spring=m_spring,

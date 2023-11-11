@@ -10,7 +10,9 @@ class App:
     def __init__(self):
         pygame.init()
         monitor = screeninfo.get_monitors()[0]
-        self.screen = pygame.display.set_mode((monitor.width, monitor.height))
+        monitor.height -= 1
+        self.monitor = monitor
+        self.screen = pygame.display.set_mode((monitor.width, monitor.height), pygame.NOFRAME)
         self.menu_screen = MenuScreen(self)
         self.authors_screen = AuthorsScreen(self)
         self.demo_screen = DemoScreen(self)

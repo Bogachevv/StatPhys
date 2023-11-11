@@ -18,7 +18,9 @@ class DemoScreen:
         self.middle_font = pygame.font.SysFont(self.font, 40, bold=True)
         self.big_font = pygame.font.SysFont(self.font, 50)
 
-        self.buttons = [Button(app, "Назад", (1300, 900), (300, 80))]
+        self.buttons = [Button(app, "Применить", (30, app.monitor.width * 0.43 + 60), (250, 80)),
+                        Button(app, "Режим", (30 + 290, app.monitor.width * 0.43 + 60), (250, 80)),
+                        Button(app, "Назад", (30 + 580, app.monitor.width * 0.43 + 60), (250, 80))]
 
         param_names, sliders_gap, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers = (
             self._load_params())
@@ -35,16 +37,16 @@ class DemoScreen:
             zip(param_names, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers)
         ]
 
-        self.demo = Demo(app, (170, 50), (600, 600), (255, 255, 255), (100, 100, 100), self.bg_color,
+        self.demo = Demo(app, (30, 30), (app.monitor.width * 0.43, app.monitor.width * 0.43), (255, 255, 255), (100, 100, 100), self.bg_color,
                          {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)})
 
         self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim[:-1], self.sliders[:-1])}, 'kinetic': [0] * param_bounds[-1][1],
                             'potential': [0] * param_bounds[-1][1], 'speed': self.sliders[-1].getValue()}
 
         buf_len = config.ConfigLoader()['buf_len']
-        self.graphics = [Chart(self.app, 'kinetic', (100, 670), (500, 400), (100, 100, 100),
+        self.graphics = [Chart(self.app, 'kinetic', (app.monitor.width * 0.55, app.monitor.height * 0.4), (500, 400), (100, 100, 100),
                                len_buf=buf_len, const_legend='theoretical kinetic', const_func=self.demo.simulation.expected_kinetic_energy),
-                         Chart(self.app, 'potential', (650, 670), (500, 400), (100, 100, 100),
+                         Chart(self.app, 'potential', (app.monitor.width * 0.55, app.monitor.height * 0.7), (500, 400), (100, 100, 100),
                                len_buf=buf_len, const_legend='theoretical potential', const_func=self.demo.simulation.expected_potential_energy)]
 
         self.slider_grabbed = False
@@ -54,7 +56,7 @@ class DemoScreen:
 
         param_names = loader['param_names']
         sliders_gap = loader['sliders_gap']
-        param_poses = [(1600, h) for h in range(150, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
+        param_poses = [(self.app.monitor.width * 0.75, h) for h in range(50, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
         param_bounds = []
         param_initial = []
         for param_name in param_names:
@@ -110,7 +112,7 @@ class DemoScreen:
     def _check_buttons(self, mouse_position):
         for index, button in enumerate(self.buttons):
             if button.rect.collidepoint(mouse_position):
-                if index == 0:
+                if index == 2:
                     self.app.active_screen = self.app.menu_screen
 
     def _draw_figures(self):

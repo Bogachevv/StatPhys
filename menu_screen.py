@@ -32,10 +32,10 @@ class MenuScreen:
         self.positions = [(560, 100), (450, 150), (680, 250), (780, 300), (550, 400), (670, 470)]
         self.cmc_logo = pygame.transform.scale(pygame.image.load(self.folder + "cmc_logo.jpg"), (140, 140))
         self.msu_logo = pygame.transform.scale(pygame.image.load(self.folder + "msu_logo.jpg"), (150, 150))
-        self.buttons = [Button(app, "Демонстрация", (750, 600), (400, 80)),
-                        Button(app, "Теория", (750, 700), (400, 80)),
-                        Button(app, "Авторы", (750, 800), (400, 80)),
-                        Button(app, "Выход", (750, 900), (400, 80))]
+        self.buttons = [Button(app, "Демонстрация", (app.monitor.width // 2 - 200, 600), (400, 80)),
+                        Button(app, "Теория", (app.monitor.width // 2 - 200, 700), (400, 80)),
+                        Button(app, "Авторы", (app.monitor.width // 2 - 200, 800), (400, 80)),
+                        Button(app, "Выход", (app.monitor.width // 2 - 200, 900), (400, 80))]
     
     def _update_screen(self):
         self.screen.fill(self.bg_color)

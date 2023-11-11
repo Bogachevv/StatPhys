@@ -44,9 +44,9 @@ class DemoScreen:
                             'potential': [0] * param_bounds[-1][1], 'speed': self.sliders[-1].getValue()}
 
         buf_len = config.ConfigLoader()['buf_len']
-        self.graphics = [Chart(self.app, 'kinetic', (app.monitor.width * 0.55, app.monitor.height * 0.4), (500, 400), (100, 100, 100),
+        self.graphics = [Chart(self.app, 'kinetic', (app.monitor.width * 0.45 + 30, app.monitor.height * 0.30), (800, 330), (100, 100, 100),
                                len_buf=buf_len, const_legend='theoretical kinetic', const_func=self.demo.simulation.expected_kinetic_energy),
-                         Chart(self.app, 'potential', (app.monitor.width * 0.55, app.monitor.height * 0.7), (500, 400), (100, 100, 100),
+                         Chart(self.app, 'potential', (app.monitor.width * 0.45 + 30,  app.monitor.height * 0.30 + 340), (800, 330), (100, 100, 100),
                                len_buf=buf_len, const_legend='theoretical potential', const_func=self.demo.simulation.expected_potential_energy)]
 
         self.slider_grabbed = False
@@ -56,7 +56,7 @@ class DemoScreen:
 
         param_names = loader['param_names']
         sliders_gap = loader['sliders_gap']
-        param_poses = [(self.app.monitor.width * 0.75, h) for h in range(50, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
+        param_poses = [(self.app.monitor.width * 0.73 + 30, h) for h in range(50, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
         param_bounds = []
         param_initial = []
         for param_name in param_names:

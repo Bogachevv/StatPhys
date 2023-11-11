@@ -271,6 +271,8 @@ class Simulation:
         self._E_full = self.calc_full_energy()
         self._T_tar = self.T
 
+        self._init_ids_pairs()
+
     def _set_particles_cnt(self, particles_cnt: int):
         if particles_cnt < 0:
             raise ValueError("particles_cnt must be >= 0")

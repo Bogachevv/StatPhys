@@ -83,7 +83,7 @@ class Simulation:
         self._frame_no = (self._frame_no + 1) % 25
 
         self._potential_energy.append(self.calc_potential_energy())
-        self._kinetic_energy.append(self.calc_potential_energy())
+        self._kinetic_energy.append(self.calc_kinetic_energy())
 
         if self._frame_no == 0:
             self._fix_energy()

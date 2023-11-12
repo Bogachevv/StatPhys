@@ -40,12 +40,19 @@ class DemoScreen:
         self.demo = Demo(app, (30, 30), (app.monitor.width * 0.43, app.monitor.width * 0.43), (255, 255, 255), (100, 100, 100), self.bg_color,
                          {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)})
 
-        self.demo_config = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)}, 'kinetic': [0] * param_bounds[-1][1],
-                            'potential': [0] * param_bounds[-1][1], 'is_changed': False}
+        self.demo_config = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)},
+                            'kinetic': [0] * param_bounds[-1][1],
+                            'mean_kinetic': [0] * param_bounds[-1][1],
+                            'potential': [0] * param_bounds[-1][1],
+                            'mean_potential': [0] * param_bounds[-1][1], 'is_changed': False}
 
         print(self.demo_config)
         buf_len = config.ConfigLoader()['buf_len']
-        self.graphics = [Chart(self.app, 'kinetic', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+        self.graphics = [Chart(self.app, 'mean_kinetic', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='theoretical kinetic', const_func=self.demo.simulation.mean_kinetic_energy),
+                         Chart(self.app, 'mean_potential', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='theoretical potential', const_func=self.demo.simulation.mean_potential_energy),
+                         Chart(self.app, 'kinetic', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
                                len_buf=buf_len, const_legend='theoretical kinetic', const_func=self.demo.simulation.expected_kinetic_energy),
                          Chart(self.app, 'potential', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
                                len_buf=buf_len, const_legend='theoretical potential', const_func=self.demo.simulation.expected_potential_energy)]

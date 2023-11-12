@@ -48,13 +48,13 @@ class DemoScreen:
 
         print(self.demo_config)
         buf_len = config.ConfigLoader()['buf_len']
-        self.graphics = [Chart(self.app, 'mean_kinetic', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
-                               len_buf=buf_len, const_legend='theoretical kinetic', const_func=self.demo.simulation.mean_kinetic_energy),
-                         Chart(self.app, 'mean_potential', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
-                               len_buf=buf_len, const_legend='theoretical potential', const_func=self.demo.simulation.mean_potential_energy),
-                         Chart(self.app, 'kinetic', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+        self.graphics = [Chart(self.app, 'kinetic', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
                                len_buf=buf_len, const_legend='theoretical kinetic', const_func=self.demo.simulation.expected_kinetic_energy),
                          Chart(self.app, 'potential', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='theoretical potential', const_func=self.demo.simulation.expected_potential_energy),
+                         Chart(self.app, 'mean_kinetic', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='theoretical kinetic', const_func=self.demo.simulation.expected_kinetic_energy),
+                         Chart(self.app, 'mean_potential', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
                                len_buf=buf_len, const_legend='theoretical potential', const_func=self.demo.simulation.expected_potential_energy)]
 
         self.slider_grabbed = False
@@ -125,6 +125,8 @@ class DemoScreen:
                         fig._refresh_iter(self.demo_config)
                     self.demo._refresh_iter(self.demo_config)
                     self.demo_config['is_changed'] = False
+                if index == 1:
+                    self.graphics[2:], self.graphics[:2] = self.graphics[:2], self.graphics[2:]
                 if index == 2:
                     self.app.active_screen = self.app.menu_screen
 

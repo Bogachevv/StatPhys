@@ -68,9 +68,13 @@ class Demo:
             new_args = next(self.simulation)
             params['kinetic'][i] = self.simulation.calc_kinetic_energy().item()
             params['potential'][i] = self.simulation.calc_potential_energy().item()
+            params['mean_kinetic'][i] = self.simulation.mean_kinetic_energy(3000)
+            params['mean_potential'][i] = self.simulation.mean_potential_energy(3000)
         for i in range(params['params']['speed'], len(params['kinetic'])):
             params['kinetic'][i] = -1
             params['potential'][i] = -1
+            params['mean_kinetic'][i] = -1
+            params['mean_potential'][i] = -1
 
         # params['kinetic'] = self.simulation.calc_kinetic_energy().item()
         # params['potential'] = self.simulation.calc_potential_energy().item()

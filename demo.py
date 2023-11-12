@@ -15,6 +15,7 @@ class Demo:
         self.size = demo_size[0]
         self.pos_start = position[0], position[1] + self.size
         self.params = params
+        self.modified_par = None
         loader = config.ConfigLoader()
 
         # r_init = np.random.uniform(size=(2, params['r'] + 2))
@@ -34,33 +35,35 @@ class Demo:
         )
 
     def set_params(self, params, par):
+        loader = config.ConfigLoader()
         if par == 'gamma':
             self.simulation.set_params(gamma=params['gamma'])
         elif par == 'k':
             self.simulation.set_params(k=params['k'])
         elif par == 'R':
-            self.simulation.set_params(R_spring=params['R'] * R_SIZE)
+            self.simulation.set_params(R_spring=params['R'] * loader["R_size"])
         elif par == 'T':
             self.simulation.set_params(T=params['T'])
         elif par == 'r':
             self.simulation.set_params(particles_cnt=params['r'])
         elif par == 'm_spring':
-            self.simulation.set_params(m_spring=params['m_spring'] * R_MASS)
+            self.simulation.set_params(m_spring=params['m_spring'] * loader["R_mass"])
 
     def draw_check(self, params):
         pygame.draw.rect(self.screen, self.bg_color, self.main)
         # updating params
-        modified_par = None
+#        modified_par = None
         for i, par1, par2 in zip(range(len(self.params)), params['params'].values(), self.params.values()):
             if abs(par1 - par2) > 1e-4:
-                modified_par = list(self.params.keys())[i]
+                self.modified_par = list(self.params.keys())[i]
                 params['is_changed'] = True
                 break
 
-        if modified_par is not None:
-            self.set_params(params['params'], modified_par)
-            self.params[modified_par] = params['params'][modified_par]
+#        if self.modified_par is not None:
+#            self.set_params(params['params'], modified_par)
+#            self.params[modified_par] = params['params'][modified_par]
 
+        new_args = next(self.simulation)
         for i in range(params['params']['speed']):
             new_args = next(self.simulation)
             params['kinetic'][i] = self.simulation.calc_kinetic_energy().item()
@@ -92,4 +95,9 @@ class Demo:
         pygame.draw.rect(self.screen, self.bd_color, (
         self.position[0] - inner_border, self.position[1] - inner_border, self.size + inner_border * 2,
         self.size + inner_border * 2), inner_border)
+
+    def _refresh_iter(self, params):
+        if self.modified_par is not None:
+            self.set_params(params['params'], self.modified_par)
+            self.params[self.modified_par] = params['params'][self.modified_par]
 

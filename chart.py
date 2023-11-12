@@ -57,7 +57,7 @@ class Chart:
 
     def draw(self, params):
         self.buf.extend(params[self.name])
-        self._refresh_iter(params)
+#       self._refresh_iter(params)
         if len(self.buf) > 1:
             self.chart.add_title(f'{self.name}_energy')
             self.chart.add_legend()

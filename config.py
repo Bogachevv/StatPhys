@@ -1,8 +1,8 @@
 import configloader
-# import py_singleton
+import py_singleton
 
 
-# @py_singleton.singleton
+@py_singleton.singleton
 class ConfigLoader(object):
     def __init__(self):
         self._loader = configloader.ConfigLoader()

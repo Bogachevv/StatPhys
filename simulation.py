@@ -2,7 +2,9 @@ import itertools
 import numpy as np
 from numpy import ndarray
 from typing import Tuple, Union
-from scipy import stats
+from scipy import stats, integrate
+from bisect import bisect_left
+import warnings
 
 
 class Simulation:
@@ -16,7 +18,9 @@ class Simulation:
         self._l_0 = l_0
         self._R = R
         self._R_spring = R_spring
-        self._r = np.random.uniform(size=(2, spring_cnt + particles_cnt))
+        r = np.random.uniform(size=(2, particles_cnt))
+        r_spring = Simulation._sample_r_sping(spring_cnt, k, self._k_boltz, l_0, gamma, T)
+        self._r = np.hstack([r_spring, r])
         v = stats.norm.rvs(loc=0.0, scale=np.sqrt(self._k_boltz*T / m), size=(2, particles_cnt))
         v_spring = stats.norm.rvs(loc=0.0, scale=np.sqrt(self._k_boltz * T / m_spring), size=(2, spring_cnt))
         self._v = np.hstack([v_spring, v])
@@ -24,6 +28,16 @@ class Simulation:
         self._n_particles = particles_cnt
         self._n_spring = spring_cnt
 
+        self._init_ids_pairs()
+
+        self._potential_energy = []
+        self._kinetic_energy = []
+
+        self._E_full = self.calc_full_energy()
+        self._T_tar = self.T
+        self._frame_no = 1
+
+    def _init_ids_pairs(self):
         spring_ids = np.arange(self._n_spring)
         self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))
 
@@ -36,17 +50,49 @@ class Simulation:
         self._available_particles_ids_pairs = self._particles_ids_pairs.copy()
         self._available_spring_particles_ids_paris = self._spring_particles_ids_paris.copy()
 
-        self._potential_energy = []
-        self._kinetic_energy = []
+    @staticmethod
+    def _sample_r_sping(spring_cnt: int, k: float, k_boltz: float, l_0: float, gamma: float, T: float):
+        assert spring_cnt == 2, "Not implemented"
+
+        def f(l):
+            return np.exp(-k * (np.abs(l - l_0) ** (gamma + 1)) / (2 * k_boltz * T * (gamma + 1)))
+
+        r_sp = np.linspace(0, 0.5, num=10_000)
+        F = integrate.cumulative_trapezoid(y=f(r_sp), x=r_sp, initial=0)
+        const = F[-1]
+        F /= const
+
+        print(f"{f(0.5)=}\t{f(1.0)=}")
+
+        un = np.random.rand(1)
+        l_between = r_sp[bisect_left(F, un)]
+
+        print(f"{l_between=}")
+
+        r_0 = np.array([0.5, 0.5])
+        phi = np.random.rand() * 2*np.pi
+        r_1 = r_0 + l_between * np.array([np.cos(phi), np.sin(phi)])
+
+        return np.vstack([r_0, r_1]).T
 
     def __iter__(self):
         return self
 
     def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
         f = self.motion(dt=0.00001)
+        self._frame_no = (self._frame_no + 1) % 25
 
         self._potential_energy.append(self.calc_potential_energy())
         self._kinetic_energy.append(self.calc_potential_energy())
+
+        if self._frame_no == 0:
+            self._fix_energy()
+
+        # with open("E_dump.txt", "a") as fl:
+        #     print(f"{self.calc_full_energy():.4f}", file=fl)
+        #
+        # with open("T_dump.txt", "a") as fl:
+        #     print(f"{self.T:5.2f}", file=fl)
 
         return self.r, self.r_spring, self.v, self.v_spring, f
 
@@ -58,8 +104,10 @@ class Simulation:
     def T(self, val: float):
         if val <= 0:
             raise ValueError("T  must be > 0")
-        delta = val / self.T
+        delta = val / self._T_tar
         self._v *= np.sqrt(delta)
+        self._E_full = self.calc_full_energy()
+        self._T_tar = val
 
     @property
     def gamma(self) -> float:
@@ -68,6 +116,7 @@ class Simulation:
     @gamma.setter
     def gamma(self, val: float):
         self._gamma = val
+        self._E_full = self.calc_full_energy()
 
     @property
     def k(self) -> float:
@@ -76,6 +125,7 @@ class Simulation:
     @k.setter
     def k(self, val: float):
         self._k = val
+        self._E_full = self.calc_full_energy()
 
     @property
     def l_0(self) -> float:
@@ -84,6 +134,7 @@ class Simulation:
     @l_0.setter
     def l_0(self, val: float):
         self._l_0 = val
+        self._E_full = self.calc_full_energy()
 
     @property
     def R(self) -> float:
@@ -217,6 +268,11 @@ class Simulation:
         self._v = np.hstack([self._v, v])
         self._m = np.hstack([self._m, m])
 
+        self._E_full = self.calc_full_energy()
+        self._T_tar = self.T
+
+        self._init_ids_pairs()
+
     def _set_particles_cnt(self, particles_cnt: int):
         if particles_cnt < 0:
             raise ValueError("particles_cnt must be >= 0")
@@ -235,15 +291,10 @@ class Simulation:
             )
 
         if particles_cnt != self._n_particles:
-            self._n_particles = particles_cnt
+            self._init_ids_pairs()
 
-            spring_ids = np.arange(self._n_spring)
-            self._spring_ids_pairs = np.asarray(list(itertools.combinations(spring_ids, 2)))
-
-            particles_ids = np.arange(self._n_particles) + self._n_spring
-            self._particles_ids_pairs = np.asarray(list(itertools.combinations(particles_ids, 2)))
-
-            self._spring_particles_ids_paris = np.asarray(list(itertools.product(spring_ids, particles_ids)))
+        self._E_full = self.calc_full_energy()
+        self._T_tar = self.T
 
     def set_params(self,
                    gamma: float = None, k: float = None, l_0: float = None,
@@ -273,14 +324,31 @@ class Simulation:
         if particles_cnt is not None:
             self._set_particles_cnt(particles_cnt)
 
+        self._E_full = self.calc_full_energy()
+        self._T_tar = self.T
+
     def expected_potential_energy(self) -> float:
-        return float((self._k_boltz * self.T) / (self.gamma + 1))
+        return float((self._k_boltz * self._T_tar) / (self.gamma + 1))
 
     def expected_kinetic_energy(self) -> float:
-        return float(self._k_boltz * self.T)
+        return float(self._k_boltz * self._T_tar)
 
     def calc_kinetic_energy(self) -> float:
         return np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
+
+    def calc_full_kinetic_energy(self):
+        E_spring = np.sum((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
+        E_particles = np.sum((np.linalg.norm(self.v, axis=0) ** 2) * self.m) / 2
+        return float(E_spring + E_particles)
+
+    def _fix_energy(self):
+        E_par = np.sum((np.linalg.norm(self.v, axis=0) ** 2) * self.m) / 2
+        beta = (self._E_full - 2 * self.calc_potential_energy() - self._n_spring*self.calc_kinetic_energy()) / E_par
+        self._v[:, self._n_spring:] *= np.sqrt(beta)
+        # print(f"DEBUG: {self._E_full - self.calc_full_energy()}")
+
+    def calc_full_energy(self):
+        return self.calc_full_kinetic_energy() + 2 * self.calc_potential_energy()
 
     def calc_potential_energy(self) -> float:
         dr = self.r_spring[:, 0] - self.r_spring[:, 1]
@@ -307,4 +375,3 @@ class Simulation:
             return float(np.mean(self._kinetic_energy))
         else:
             return float(np.mean(self._kinetic_energy[-frames_c:]))
-

@@ -35,10 +35,11 @@ class ListBuff:
 
 
 class Chart:
-    def __init__(self, app, name, position, size, border_color, len_buf=10, bd_width=3,
+    def __init__(self, app, name, title, position, size, border_color, len_buf=10, bd_width=3,
                  const_val=None, const_legend: str = None, const_func = None):
         self.screen = app.screen
         self.name = name
+        self.title = title
         self.chart = pyc.Figure(self.screen, position[0], position[1], size[0], size[1])
         self.border = pygame.Rect(*position, *size)
         self.bd_params = border_color, bd_width
@@ -59,13 +60,13 @@ class Chart:
         self.buf.extend(params[self.name])
 #       self._refresh_iter(params)
         if len(self.buf) > 1:
-            self.chart.add_title(f'{self.name}_energy')
+            self.chart.add_title(f'{self.title}')
             self.chart.add_legend()
             self.chart.line(self.const_legend,
                             list(range(1, len(self.buf) + 1)),
                             [self.const_func()] * len(self.buf),
                             line_width=2)
-            self.chart.line(self.name, list(range(1, len(self.buf) + 1)), self.buf.main, line_width=3)
+            self.chart.line(self.title, list(range(1, len(self.buf) + 1)), self.buf.main, line_width=3)
             self.chart.draw()
             pygame.draw.rect(self.screen, self.bd_params[0], self.border, self.bd_params[1])
     

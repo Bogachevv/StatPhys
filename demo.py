@@ -27,8 +27,9 @@ class Demo:
         # v, v_spring = v_init[:, 2:], v_init[:, :2]
         # Размер броуновских частиц
 
+        l_0 = loader['l_0']
         self.simulation = Simulation(
-            gamma=params['gamma'], k=params['k'], l_0=0.05, R=loader["R_size"], R_spring=loader["R_size"] * params['R'],
+            gamma=params['gamma'], k=params['k'], l_0=l_0, R=loader["R_size"], R_spring=loader["R_size"] * params['R'],
             particles_cnt=params['r'], spring_cnt=2,
             T = params['T'],
             m=m, m_spring=m_spring,
@@ -63,13 +64,14 @@ class Demo:
 #            self.set_params(params['params'], modified_par)
 #            self.params[modified_par] = params['params'][modified_par]
 
+        loader = config.ConfigLoader()
         new_args = next(self.simulation)
         for i in range(params['params']['speed']):
             new_args = next(self.simulation)
             params['kinetic'][i] = self.simulation.calc_kinetic_energy().item()
             params['potential'][i] = self.simulation.calc_potential_energy().item()
-            params['mean_kinetic'][i] = self.simulation.mean_kinetic_energy(3000)
-            params['mean_potential'][i] = self.simulation.mean_potential_energy(3000)
+            params['mean_kinetic'][i] = self.simulation.mean_kinetic_energy(loader['sim_avg_frames_c'])
+            params['mean_potential'][i] = self.simulation.mean_potential_energy(loader['sim_avg_frames_c'])
         for i in range(params['params']['speed'], len(params['kinetic'])):
             params['kinetic'][i] = -1
             params['potential'][i] = -1

@@ -59,7 +59,9 @@ class MenuScreen:
             if button.rect.collidepoint(mouse_position):
                 if index == 0:
                     self.app.active_screen = self.app.demo_screen
-                if index == 2:
+                elif index == 1:
+                    self.app.active_screen = self.app.theory_screen
+                elif index == 2:
                     self.app.active_screen = self.app.authors_screen
                 elif index == 3:
                     quit()

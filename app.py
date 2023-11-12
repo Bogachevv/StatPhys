@@ -1,9 +1,10 @@
 import pygame
 import screeninfo
+import config
 from menu_screen import MenuScreen
 from authors_screen import AuthorsScreen
 from demo_screen import DemoScreen
-import config
+from theory_screen import TheoryScreen
 
 
 class App:
@@ -15,6 +16,7 @@ class App:
         self.screen = pygame.display.set_mode((monitor.width, monitor.height), pygame.NOFRAME)
         self.menu_screen = MenuScreen(self)
         self.authors_screen = AuthorsScreen(self)
+        self.theory_screen = TheoryScreen(self)
         self.demo_screen = DemoScreen(self)
         self.clock = pygame.time.Clock()
 

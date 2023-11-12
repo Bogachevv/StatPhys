@@ -80,7 +80,7 @@ class Simulation:
 
     def __next__(self) -> Tuple[ndarray, ndarray, ndarray, ndarray, float]:
         f = self.motion(dt=0.00001)
-        self._frame_no = (self._frame_no + 1) % 25
+        self._frame_no = (self._frame_no + 1) % 5
 
         self._potential_energy.append(self.calc_potential_energy())
         self._kinetic_energy.append(self.calc_kinetic_energy())

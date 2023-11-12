@@ -48,13 +48,13 @@ class DemoScreen:
 
         print(self.demo_config)
         buf_len = config.ConfigLoader()['buf_len']
-        self.graphics = [Chart(self.app, 'kinetic', 'кинетическая энергия', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
-                               len_buf=buf_len, const_legend='теоритическая кинетическая энергия', const_func=self.demo.simulation.expected_kinetic_energy),
-                         Chart(self.app, 'potential', 'потенциальная энергия', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
-                               len_buf=buf_len, const_legend='теоритическая потенциальная энергия', const_func=self.demo.simulation.expected_potential_energy),
-                         Chart(self.app, 'mean_kinetic', 'средняя кинетическая энергия', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+        self.graphics = [Chart(self.app, 'mean_kinetic', 'средняя кинетическая энергия', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
                                len_buf=buf_len, const_legend='теоритическая кинетическая энергия', const_func=self.demo.simulation.expected_kinetic_energy),
                          Chart(self.app, 'mean_potential', 'средняя потенциальная энергия', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='теоритическая потенциальная энергия', const_func=self.demo.simulation.expected_potential_energy),
+                         Chart(self.app, 'kinetic', 'кинетическая энергия', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='теоритическая кинетическая энергия', const_func=self.demo.simulation.expected_kinetic_energy),
+                         Chart(self.app, 'potential', 'потенциальная энергия', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
                                len_buf=buf_len, const_legend='теоритическая потенциальная энергия', const_func=self.demo.simulation.expected_potential_energy)]
 
         self.slider_grabbed = False

@@ -36,8 +36,8 @@ class AuthorsScreen():
         
         self.pictures = [pygame.transform.scale(pygame.image.load(self.folder + "cmc_logo.jpg"), (140, 140)),
                          pygame.transform.scale(pygame.image.load(self.folder + "msu_logo.jpg"), (150, 150)),
-                         pygame.transform.scale(pygame.image.load(self.folder + "volodya.png"), (400, 400)),
-                         pygame.transform.scale(pygame.image.load(self.folder + "volodya.png"), (400, 400)),
+                         pygame.transform.scale(pygame.image.load(self.folder + "Arslan_Valeev.jpg"), (400, 400)),
+                         pygame.transform.scale(pygame.image.load(self.folder + "Vladimir_Bogachev.jpg"), (400, 400)),
                          pygame.transform.scale(pygame.image.load(self.folder + "Aleksander_Malakhov.jpg"), (400, 400))
                          ]
         

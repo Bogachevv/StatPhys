@@ -1,5 +1,4 @@
 import pygame
-import pygame_widgets
 from button import Button
 from slider import *
 from demo import Demo
@@ -19,12 +18,14 @@ class DemoScreen:
         self.middle_font = pygame.font.SysFont(self.font, 40, bold=True)
         self.big_font = pygame.font.SysFont(self.font, 50)
 
-        self.buttons = [Button(app, "Назад", (1300, 900), (300, 80))]
+        self.buttons = [Button(app, "Применить", (30, app.monitor.width * 0.43 + 60), (250, 80)),
+                        Button(app, "Режим", (30 + 290, app.monitor.width * 0.43 + 60), (250, 80)),
+                        Button(app, "Назад", (30 + 580, app.monitor.width * 0.43 + 60), (250, 80))]
 
         param_names, sliders_gap, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers = (
             self._load_params())
 
-        param_initial = map(_init_val_into_unit, param_initial, param_bounds)
+        param_initial = list(map(_init_val_into_unit, param_initial, param_bounds))
 
         self.sliders = [
             ParamSlider(app, name, pos, bounds, step, name_par, dec_number,
@@ -36,17 +37,25 @@ class DemoScreen:
             zip(param_names, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers)
         ]
 
-        self.demo = Demo(app, (170, 50), (600, 600), (255, 255, 255), (100, 100, 100), self.bg_color,
+        self.demo = Demo(app, (30, 30), (app.monitor.width * 0.43, app.monitor.width * 0.43), (255, 255, 255), (100, 100, 100), self.bg_color,
                          {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)})
 
-        self.demo_params = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)}, 'kinetic': 0,
-                            'potential': 0}
+        self.demo_config = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)},
+                            'kinetic': [0] * param_bounds[-1][1],
+                            'mean_kinetic': [0] * param_bounds[-1][1],
+                            'potential': [0] * param_bounds[-1][1],
+                            'mean_potential': [0] * param_bounds[-1][1], 'is_changed': False}
 
+        print(self.demo_config)
         buf_len = config.ConfigLoader()['buf_len']
-        self.graphics = [Chart(self.app, 'kinetic', (100, 670), (500, 400), (100, 100, 100),
-                               len_buf=buf_len, const_legend='theoretical kinetic'),
-                         Chart(self.app, 'potential', (650, 670), (500, 400), (100, 100, 100),
-                               len_buf=buf_len, const_legend='theoretical potential')]
+        self.graphics = [Chart(self.app, 'mean_kinetic', 'средняя кинетическая энергия', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='теоритическая кинетическая энергия', const_func=self.demo.simulation.expected_kinetic_energy),
+                         Chart(self.app, 'mean_potential', 'средняя потенциальная энергия', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='теоритическая потенциальная энергия', const_func=self.demo.simulation.expected_potential_energy),
+                         Chart(self.app, 'kinetic', 'кинетическая энергия', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='теоритическая кинетическая энергия', const_func=self.demo.simulation.expected_kinetic_energy),
+                         Chart(self.app, 'potential', 'потенциальная энергия', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='теоритическая потенциальная энергия', const_func=self.demo.simulation.expected_potential_energy)]
 
         self.slider_grabbed = False
 
@@ -55,7 +64,7 @@ class DemoScreen:
 
         param_names = loader['param_names']
         sliders_gap = loader['sliders_gap']
-        param_poses = [(1600, h) for h in range(150, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
+        param_poses = [(self.app.monitor.width * 0.75 + 50, h) for h in range(50, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
         param_bounds = []
         param_initial = []
         for param_name in param_names:
@@ -64,17 +73,17 @@ class DemoScreen:
         param_step = [round((b[1] - b[0]) / 100, 3) for b in param_bounds]
         param_step[1], param_step[2] = int(param_step[1]), int(param_step[2])
         par4sim = loader['par4sim']
-        dec_numbers = [1, 0, 0, 0, 1, 0]
+        dec_numbers = [1, 0, 0, 0, 1, 0, 0]
 
         return param_names, sliders_gap, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers
 
     def _update_screen(self):
         self.screen.fill(self.bg_color)
-        self.demo.draw_check(self.demo_params)
+        self.demo.draw_check(self.demo_config)
         for button in self.buttons:
             button.draw_button()
         for slider in self.sliders:
-            slider.draw_check(self.demo_params['params'])
+            slider.draw_check(self.demo_config['params'])
         self._draw_figures()
 
     def _check_events(self):
@@ -112,11 +121,20 @@ class DemoScreen:
         for index, button in enumerate(self.buttons):
             if button.rect.collidepoint(mouse_position):
                 if index == 0:
+                    for fig in self.graphics:
+                        fig._refresh_iter(self.demo_config)
+                    self.demo._refresh_iter(self.demo_config)
+                    self.demo_config['is_changed'] = False
+                if index == 1:
+                    self.graphics[2:], self.graphics[:2] = self.graphics[:2], self.graphics[2:]
+                if index == 2:
                     self.app.active_screen = self.app.menu_screen
 
     def _draw_figures(self):
         for fig in self.graphics:
-            fig.draw(self.demo_params)
+            fig.draw(self.demo_config)
+        # Part of refreshing charts feature.
+#        self.demo_config['is_changed'] = False
 
 
 def _init_val_into_unit(initial_val, bounds) -> float:

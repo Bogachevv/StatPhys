@@ -4,10 +4,10 @@ import pygame
 
 class ParamSlider:
     def __init__(self, app, name, position, bounds, step, name_par, dec_number,
-                 initial_pos: float = 0.5,
+                 initial_pos,
                  **kwargs):
         self.name_par = name_par
-        self.dec_round = lambda x: int(x) if dec_number == 0 else round(x, dec_number)
+        self.dec_round = lambda x: int(round(x, 0)) if dec_number == 0 else round(x, dec_number)
         self.init_values = {
             'slider': [250, 15],
             'sl_value': {

@@ -16,7 +16,8 @@ class AuthorsScreen():
                         "Лектор: Андреев Анатолий Васильевич",
                         "Руководитель: Чичигина Ольга Александровна",
                         "Валеев Арслан",
-                        "Богачев Владимир"]
+                        "Богачев Владимир",
+                        "Малахов Александр"]
         
         self.strings_surfaces = []
         for index, string in enumerate(self.strings):
@@ -26,14 +27,24 @@ class AuthorsScreen():
                 self.strings_surfaces.append(self.little_font.render(string, False, (0, 0, 0)))
         
         #self.text_positions = [(400, 100), (500, 150), (670, 850), (600, 790), (395, 720), (1230, 720)]
-        self.text_positions = [(560, 100), (450, 150), (650, 850), (580, 790), (395, 720), (1200, 720)]
+        self.text_positions = [(560, 100), (450, 150),
+                               (self.app.monitor.width * 0.5 - 290, 850),
+                               (self.app.monitor.width * 0.5 - 340, 790),
+                               (self.app.monitor.width * 0.1 + 20 + 100, self.app.monitor.height * 0.2 + 100 + 400 + 10),
+                               (self.app.monitor.width * 0.9 - 20 - 340, self.app.monitor.height * 0.2 + 100 + 400 + 10),
+                               (self.app.monitor.width * 0.5 - 140, self.app.monitor.height * 0.2 + 100 + 400 + 10)]
         
         self.pictures = [pygame.transform.scale(pygame.image.load(self.folder + "cmc_logo.jpg"), (140, 140)),
                          pygame.transform.scale(pygame.image.load(self.folder + "msu_logo.jpg"), (150, 150)),
-                         pygame.transform.scale(pygame.image.load(self.folder + "volodya.png"), (400, 400)),
-                         pygame.transform.scale(pygame.image.load(self.folder + "volodya.png"), (400, 400))]
+                         pygame.transform.scale(pygame.image.load(self.folder + "Arslan_Valeev.jpg"), (400, 400)),
+                         pygame.transform.scale(pygame.image.load(self.folder + "Vladimir_Bogachev.jpg"), (400, 400)),
+                         pygame.transform.scale(pygame.image.load(self.folder + "Aleksander_Malakhov.jpg"), (400, 400))
+                         ]
         
-        self.pictures_positions = [(1600, 80), (180, 80), (340, 300), (1160, 300)]
+        self.pictures_positions = [(1600, 80), (180, 80),
+                                   (self.app.monitor.width * 0.1 + 30, self.app.monitor.height * 0.2 + 100),
+                                   (self.app.monitor.width * 0.9 - 30 - 400, self.app.monitor.height * 0.2 + 100),
+                                   (self.app.monitor.width * 0.5 - 200, self.app.monitor.height * 0.2 + 100)]
         self.buttons = [Button(app, "Назад", (1300, 900), (300, 80))]
     
     def _update_screen(self):

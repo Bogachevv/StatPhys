@@ -28,5 +28,5 @@
   "R_mass": 10e-5,
   "FPS": 60,
   "buf_len": 20,
-  "sim_avg_frames_c": 300
+  "sim_avg_frames_c": 6000
 }

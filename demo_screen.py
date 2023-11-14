@@ -18,9 +18,9 @@ class DemoScreen:
         self.middle_font = pygame.font.SysFont(self.font, 40, bold=True)
         self.big_font = pygame.font.SysFont(self.font, 50)
 
-        self.buttons = [Button(app, "Применить", (30, app.monitor.width * 0.43 + 60), (250, 80)),
-                        Button(app, "Режим", (30 + 290, app.monitor.width * 0.43 + 60), (250, 80)),
-                        Button(app, "Назад", (30 + 580, app.monitor.width * 0.43 + 60), (250, 80))]
+        self.buttons = [Button(app, "Применить", (app.monitor.width * 0.05 + 30, app.monitor.width * 0.43 + 60), (250, 80)),
+                        Button(app, "Режим", (app.monitor.width * 0.05 + 30 + 290, app.monitor.width * 0.43 + 60), (250, 80)),
+                        Button(app, "Назад", (app.monitor.width * 0.05 + 30 + 580, app.monitor.width * 0.43 + 60), (250, 80))]
 
         param_names, sliders_gap, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers = (
             self._load_params())
@@ -30,14 +30,14 @@ class DemoScreen:
         self.sliders = [
             ParamSlider(app, name, pos, bounds, step, name_par, dec_number,
                         button_color=self.bg_color, font='sans',
-                        bold=False, fontSize=25,
+                        bold=False, fontSize=32,
                         initial_pos=initial
                         )
             for name, pos, bounds, initial, step, name_par, dec_number in
             zip(param_names, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers)
         ]
 
-        self.demo = Demo(app, (30, 30), (app.monitor.width * 0.43, app.monitor.width * 0.43), (255, 255, 255), (100, 100, 100), self.bg_color,
+        self.demo = Demo(app, (app.monitor.width * 0.05 + 30, 30), (app.monitor.width * 0.43, app.monitor.width * 0.43), (255, 255, 255), (100, 100, 100), self.bg_color,
                          {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)})
 
         self.demo_config = {'params': {name: sl.getValue() for name, sl in zip(par4sim, self.sliders)},
@@ -48,14 +48,14 @@ class DemoScreen:
 
         print(self.demo_config)
         buf_len = config.ConfigLoader()['buf_len']
-        self.graphics = [Chart(self.app, 'mean_kinetic', 'средняя кинетическая энергия', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
-                               len_buf=buf_len, const_legend='теоритическая кинетическая энергия', const_func=self.demo.simulation.expected_kinetic_energy),
-                         Chart(self.app, 'mean_potential', 'средняя потенциальная энергия', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
-                               len_buf=buf_len, const_legend='теоритическая потенциальная энергия', const_func=self.demo.simulation.expected_potential_energy),
-                         Chart(self.app, 'kinetic', 'кинетическая энергия', (app.monitor.width * 0.46 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
-                               len_buf=buf_len, const_legend='теоритическая кинетическая энергия', const_func=self.demo.simulation.expected_kinetic_energy),
-                         Chart(self.app, 'potential', 'потенциальная энергия', (app.monitor.width * 0.46 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
-                               len_buf=buf_len, const_legend='теоритическая потенциальная энергия', const_func=self.demo.simulation.expected_potential_energy)]
+        self.graphics = [Chart(self.app, 'mean_kinetic', 'средняя кинетическая энергия', (app.monitor.width * 0.5 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='kT', const_func=self.demo.simulation.expected_kinetic_energy),
+                         Chart(self.app, 'mean_potential', 'средняя потенциальная энергия', (app.monitor.width * 0.5 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='kT/(γ+1)', const_func=self.demo.simulation.expected_potential_energy),
+                         Chart(self.app, 'kinetic', 'кинетическая энергия', (app.monitor.width * 0.5 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='kT', const_func=self.demo.simulation.expected_kinetic_energy),
+                         Chart(self.app, 'potential', 'потенциальная энергия', (app.monitor.width * 0.5 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
+                               len_buf=buf_len, const_legend='kT/(γ+1)', const_func=self.demo.simulation.expected_potential_energy)]
 
         self.slider_grabbed = False
 
@@ -64,7 +64,7 @@ class DemoScreen:
 
         param_names = loader['param_names']
         sliders_gap = loader['sliders_gap']
-        param_poses = [(self.app.monitor.width * 0.75 + 50, h) for h in range(50, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
+        param_poses = [(self.app.monitor.width * 0.82 + 40, h) for h in range(50, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
         param_bounds = []
         param_initial = []
         for param_name in param_names:

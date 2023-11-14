@@ -291,6 +291,7 @@ class Simulation:
             )
 
         if particles_cnt != self._n_particles:
+            self._n_particles = particles_cnt
             self._init_ids_pairs()
 
         self._E_full = self.calc_full_energy()

@@ -16,8 +16,8 @@ class TheoryScreen():
         self.pictures = []
         self.pictures_positions = []
         for i in range(1, 4):
-            self.pictures.append(pygame.transform.scale(pygame.image.load(self.folder + f"theory_page_{i}.png"), (1878, 1501)))
-            self.pictures_positions.append(((self.app.monitor.width - (self.app.monitor.height - 45 - 45) * (1878 / 1501)) * 0.5, 30))
+            self.pictures.append(pygame.transform.scale(pygame.image.load(self.folder + f"theory_page_{i}.png"), (1290, 1010)))
+            self.pictures_positions.append(((self.app.monitor.width - 1290) * 0.5, 0))
 
         self.buttons = [Button(app, "<—", (30, self.app.monitor.height - 80 - 60 ), (100, 80)),
                         Button(app, "Главное меню", (self.app.monitor.width * 0.5 - 150, self.app.monitor.height - 80 - 60 ), (300, 80)),

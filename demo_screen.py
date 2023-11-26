@@ -20,7 +20,7 @@ class DemoScreen:
 
         self.buttons = [Button(app, "Применить", (app.monitor.width * 0.05 + 30, app.monitor.width * 0.43 + 60), (250, 80)),
                         Button(app, "Режим", (app.monitor.width * 0.05 + 30 + 290, app.monitor.width * 0.43 + 60), (250, 80)),
-                        Button(app, "Назад", (app.monitor.width * 0.05 + 30 + 580, app.monitor.width * 0.43 + 60), (250, 80))]
+                        Button(app, "Главное меню", (app.monitor.width * 0.05 + 30 + 580, app.monitor.width * 0.43 + 60), (250, 80))]
 
         param_names, sliders_gap, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers = (
             self._load_params())
@@ -125,9 +125,9 @@ class DemoScreen:
                         fig._refresh_iter(self.demo_config)
                     self.demo._refresh_iter(self.demo_config)
                     self.demo_config['is_changed'] = False
-                if index == 1:
+                elif index == 1:
                     self.graphics[2:], self.graphics[:2] = self.graphics[:2], self.graphics[2:]
-                if index == 2:
+                elif index == 2:
                     self.app.active_screen = self.app.menu_screen
 
     def _draw_figures(self):

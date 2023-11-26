@@ -12,20 +12,23 @@ class TheoryScreen():
         self.little_font = pygame.font.SysFont(self.font, 38)
         self.middle_font = pygame.font.SysFont(self.font, 40, bold=True)
         self.big_font = pygame.font.SysFont(self.font, 50)
+        self.page = 0
+        self.pictures = []
+        self.pictures_positions = []
+        for i in range(1, 4):
+            self.pictures.append(pygame.transform.scale(pygame.image.load(self.folder + f"theory_page_{i}.png"), (self.app.monitor.height * (1878 / 1501) - 45 - 45, self.app.monitor.height - 30 - 60)))
+            self.pictures_positions.append(((self.app.monitor.width - self.app.monitor.height * (1878 / 1501)) * 0.5 + 45, 30))
 
-        self.pictures = [pygame.transform.scale(pygame.image.load(self.folder + "theory.png"), (self.app.monitor.width - 30 - 30, self.app.monitor.height - 30 - 60))]
-
-        self.pictures_positions = [(30, 30)]
-
-        self.buttons = [Button(app, "Назад", (self.app.monitor.width - 300 - 30, self.app.monitor.height - 80 - 60 ), (300, 80))]
+        self.buttons = [Button(app, "<—", (30, self.app.monitor.height - 80 - 60 ), (100, 80)),
+                        Button(app, "Главное меню", (self.app.monitor.width * 0.5 - 150, self.app.monitor.height - 80 - 60 ), (300, 80)),
+                        Button(app, "—>", (self.app.monitor.width - 100 - 30, self.app.monitor.height - 80 - 60 ), (100, 80))]
 
     def _update_screen(self):
         self.screen.fill(self.bg_color)
 #        for index, surface in enumerate(self.strings_surfaces):
 #            self.screen.blit(surface, self.text_positions[index])
 
-        for index, picture in enumerate(self.pictures):
-            self.screen.blit(picture, self.pictures_positions[index])
+        self.screen.blit(self.pictures[self.page], self.pictures_positions[self.page])
 
         for button in self.buttons:
             button.draw_button()
@@ -42,4 +45,8 @@ class TheoryScreen():
         for index, button in enumerate(self.buttons):
             if button.rect.collidepoint(mouse_position):
                 if index == 0:
+                    self.page = max(0, self.page - 1)
+                elif index == 1:
                     self.app.active_screen = self.app.menu_screen
+                elif index == 2:
+                    self.page = min(len(self.pictures) - 1, self.page + 1)

@@ -35,7 +35,7 @@ class AuthorsScreen():
                                (self.app.monitor.width * 0.5 - 140, self.app.monitor.height * 0.2 + 100 + 400 + 10)]
         
         self.pictures = [pygame.transform.scale(pygame.image.load(self.folder + "cmc_logo.jpg"), (140, 140)),
-                         pygame.transform.scale(pygame.image.load(self.folder + "msu_logo.jpg"), (150, 150)),
+                         pygame.transform.scale(pygame.image.load(self.folder + "physfac_logo.jpg"), (150, 150)),
                          pygame.transform.scale(pygame.image.load(self.folder + "Arslan_Valeev.jpg"), (400, 400)),
                          pygame.transform.scale(pygame.image.load(self.folder + "Vladimir_Bogachev.jpg"), (400, 400)),
                          pygame.transform.scale(pygame.image.load(self.folder + "Aleksander_Malakhov.jpg"), (400, 400))
@@ -45,7 +45,7 @@ class AuthorsScreen():
                                    (self.app.monitor.width * 0.1 + 30, self.app.monitor.height * 0.2 + 100),
                                    (self.app.monitor.width * 0.9 - 30 - 400, self.app.monitor.height * 0.2 + 100),
                                    (self.app.monitor.width * 0.5 - 200, self.app.monitor.height * 0.2 + 100)]
-        self.buttons = [Button(app, "Назад", (1300, 900), (300, 80))]
+        self.buttons = [Button(app, "Главное меню", (self.app.monitor.width * 0.9 - 30 - 300 , self.app.monitor.height - 80 - 60), (300, 80))]
     
     def _update_screen(self):
         self.screen.fill(self.bg_color)

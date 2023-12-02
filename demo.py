@@ -88,7 +88,7 @@ class Demo:
         r[1], r_spring[1] = self.pos_start[1] - r[1] * self.size, self.pos_start[1] - r_spring[1] * self.size
         r, r_spring, r_radius, r_spring_radius = np.round(r), np.round(r_spring), np.round(r_radius), np.round(r_spring_radius)
         for i in range(r.shape[1]):
-            pygame.draw.circle(self.screen, (250, 0, 0), tuple(r[:, i]), r_radius)
+            pygame.draw.circle(self.screen, (224, 27, 57), tuple(r[:, i]), r_radius)
         for i in range(r_spring.shape[1]):
             pygame.draw.circle(self.screen, (0, 0, 0), tuple(r_spring[:, i]), r_spring_radius)
 

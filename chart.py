@@ -66,7 +66,7 @@ class Chart:
                             list(range(1, len(self.buf) + 1)),
                             [self.const_func()] * len(self.buf),
                             line_width=2)
-            self.chart.line(self.title, list(range(1, len(self.buf) + 1)), self.buf.main, line_width=3)
+            self.chart.line(self.title, list(range(1, len(self.buf) + 1)), self.buf.main, color=(242,133,0),line_width=3)
             self.chart.draw()
             pygame.draw.rect(self.screen, self.bd_params[0], self.border, self.bd_params[1])
     

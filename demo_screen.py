@@ -1,4 +1,6 @@
 import pygame
+
+import language
 from button import Button
 from slider import *
 from demo import Demo
@@ -9,6 +11,7 @@ import config
 
 class DemoScreen:
     def __init__(self, app):
+        lang = language.Language()
         self.app = app
         self.screen = app.screen
         self.speed = 0.5
@@ -18,9 +21,9 @@ class DemoScreen:
         self.middle_font = pygame.font.SysFont(self.font, 40, bold=True)
         self.big_font = pygame.font.SysFont(self.font, 50)
 
-        self.buttons = [Button(app, "Применить", (app.monitor.width * 0.05 + 30, app.monitor.width * 0.43 + 60), (250, 80)),
-                        Button(app, "Режим", (app.monitor.width * 0.05 + 30 + 290, app.monitor.width * 0.43 + 60), (250, 80)),
-                        Button(app, "Главное меню", (app.monitor.width * 0.05 + 30 + 580, app.monitor.width * 0.43 + 60), (250, 80))]
+        self.buttons = [Button(app, lang['btn_apply'], (app.monitor.width * 0.05 + 30, app.monitor.width * 0.43 + 60), (250, 80)),
+                        Button(app, lang['btn_mode'], (app.monitor.width * 0.05 + 30 + 290, app.monitor.width * 0.43 + 60), (250, 80)),
+                        Button(app, lang['btn_menu'], (app.monitor.width * 0.05 + 30 + 580, app.monitor.width * 0.43 + 60), (250, 80))]
 
         param_names, sliders_gap, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers = (
             self._load_params())
@@ -48,26 +51,26 @@ class DemoScreen:
 
         print(self.demo_config)
         buf_len = config.ConfigLoader()['buf_len']
-        self.graphics = [Chart(self.app, 'mean_kinetic', 'средняя кинетическая энергия', (app.monitor.width * 0.5 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+        self.graphics = [Chart(self.app, 'mean_kinetic', lang['graph_mean'] + ' ' + lang['graph_kin'], (app.monitor.width * 0.5 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
                                len_buf=buf_len, const_legend='kT', const_func=self.demo.simulation.expected_kinetic_energy),
-                         Chart(self.app, 'mean_potential', 'средняя потенциальная энергия', (app.monitor.width * 0.5 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
+                         Chart(self.app, 'mean_potential', lang['graph_mean'] + ' ' + lang['graph_pot'], (app.monitor.width * 0.5 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
                                len_buf=buf_len, const_legend='kT/(γ+1)', const_func=self.demo.simulation.expected_potential_energy),
-                         Chart(self.app, 'kinetic', 'кинетическая энергия', (app.monitor.width * 0.5 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
+                         Chart(self.app, 'kinetic', lang['graph_kin'], (app.monitor.width * 0.5 + 50, app.monitor.height * 0.31 + 20), (800, 310), (100, 100, 100),
                                len_buf=buf_len, const_legend='kT', const_func=self.demo.simulation.expected_kinetic_energy),
-                         Chart(self.app, 'potential', 'потенциальная энергия', (app.monitor.width * 0.5 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
+                         Chart(self.app, 'potential', lang['graph_pot'], (app.monitor.width * 0.5 + 50,  app.monitor.height * 0.31 + 20 + 310 + 10), (800, 310), (100, 100, 100),
                                len_buf=buf_len, const_legend='kT/(γ+1)', const_func=self.demo.simulation.expected_potential_energy)]
 
         self.slider_grabbed = False
 
     def _load_params(self):
         loader = config.ConfigLoader()
-
-        param_names = loader['param_names']
+        lang = language.Language()
+        param_names = [lang[name] for name in loader['param_names']]
         sliders_gap = loader['sliders_gap']
         param_poses = [(self.app.monitor.width * 0.82 + 40, h) for h in range(50, 150 + len(param_names) * sliders_gap + 1, sliders_gap)]
         param_bounds = []
         param_initial = []
-        for param_name in param_names:
+        for param_name in loader['param_names']:
             param_bounds.append(tuple(loader['param_bounds'][param_name]))
             param_initial.append(loader['param_initial'][param_name])
         param_step = [round((b[1] - b[0]) / 100, 3) for b in param_bounds]

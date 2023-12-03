@@ -1,9 +1,12 @@
 import pygame
+
+import language
 from button import Button
 
 
 class TheoryScreen():
     def __init__(self, app):
+        lang = language.Language()
         self.app = app
         self.screen = app.screen
         self.folder = '_internal/images/'
@@ -20,7 +23,7 @@ class TheoryScreen():
             self.pictures_positions.append(((self.app.monitor.width - 1290) * 0.5, 0))
 
         self.buttons = [Button(app, "<—", (30, self.app.monitor.height - 80 - 60 ), (100, 80)),
-                        Button(app, "Главное меню", (self.app.monitor.width * 0.5 - 150, self.app.monitor.height - 80 - 60 ), (300, 80)),
+                        Button(app, lang['btn_menu'], (self.app.monitor.width * 0.5 - 150, self.app.monitor.height - 80 - 60 ), (300, 80)),
                         Button(app, "—>", (self.app.monitor.width - 100 - 30, self.app.monitor.height - 80 - 60 ), (100, 80))]
 
     def _update_screen(self):

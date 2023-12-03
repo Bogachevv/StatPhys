@@ -90,4 +90,5 @@ class MenuScreen:
                     elif cfg['language'] == "eng":
                         cfg.set("language", "rus")
                     lang = language.Language()
-                    lang.update()
+                    lang.reload()
+                    self.app.__init__()

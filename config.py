@@ -44,12 +44,3 @@ class ConfigLoader(object):
         with open(self._path, "w", encoding="utf-8") as f:
             json.dump(obj=dict(self._loader), fp=f, ensure_ascii=False, indent=2, separators=(',', ': '))
 
-
-def main():
-    loader = ConfigLoader()
-    loader.set(('param_initial', 'Температура'), 'val')
-    # print(json.dumps(dict(loader._loader)))
-
-
-if __name__ == '__main__':
-    main()

@@ -3,13 +3,14 @@ import pygame
 
 class Button():
     
-    def __init__(self, app, msg, position, button_size, **kwargs):
+    def __init__(self, app, msg, position, button_size, command = lambda: print('no action for button'), **kwargs):
         """Инициализирует атрибуты кнопки."""
         self.screen = app.screen
         self.screen_rect = self.screen.get_rect()
         self.font = kwargs.get('font', 'corbel')
         # Назначение размеров и свойств кнопок.
         self.width, self.height = button_size
+        self.command = command
         self.button_color = kwargs.get('button_color', (240, 240, 240))
         self.text_color = kwargs.get('text_color', (0, 0, 0))
         self.font = pygame.font.SysFont(self.font, kwargs.get('fontSize', 36), kwargs.get('bold', True))

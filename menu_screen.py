@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 
 import config
@@ -49,12 +51,35 @@ class MenuScreen:
                             (self.app.monitor.width * 0.5 - 215, 470)]
         self.cmc_logo = pygame.transform.scale(pygame.image.load(self.folder + "cmc_logo.jpg"), (150, 150))
         self.physfac_logo = pygame.transform.scale(pygame.image.load(self.folder + "physfac_logo.jpg"), (150, 150))
-        self.buttons = [Button(app, lang['btn_demo'], (app.monitor.width // 2 - 200, 600), (400, 80)),
-                        Button(app, lang['btn_theory'], (app.monitor.width // 2 - 200, 700), (400, 80)),
-                        Button(app, lang['btn_authors'], (app.monitor.width // 2 - 200, 800), (400, 80)),
-                        Button(app, lang['btn_exit'], (app.monitor.width // 2 - 200, 900), (400, 80)),
-                        Button(app, lang['btn_lang'], (app.monitor.width - 40 - 80, app.monitor.height - 70 - 80), (80, 80))]
-    
+        self.buttons = [Button(app, lang['btn_demo'], (app.monitor.width // 2 - 200, 600), (400, 80), self.to_demo),
+                        Button(app, lang['btn_theory'], (app.monitor.width // 2 - 200, 700), (400, 80), self.to_theory),
+                        Button(app, lang['btn_authors'], (app.monitor.width // 2 - 200, 800), (400, 80), self.to_authors),
+                        Button(app, lang['btn_exit'], (app.monitor.width // 2 - 200, 900), (400, 80), self.quite_demo),
+                        Button(app, lang['btn_lang'], (app.monitor.width - 40 - 80, app.monitor.height - 70 - 80), (80, 80), self.lang_change)]
+
+    def to_demo(self):
+        self.app.active_screen = self.app.demo_screen
+
+    def to_theory(self):
+        self.app.active_screen = self.app.theory_screen
+
+    def to_authors(self):
+        self.app.active_screen = self.app.authors_screen
+
+    def quite_demo(self):
+        pygame.quit()
+        sys.exit()
+
+    def lang_change(self):
+        cfg = config.ConfigLoader()
+        if cfg['language'] == "rus":
+            cfg.set("language", "eng")
+        elif cfg['language'] == "eng":
+            cfg.set("language", "rus")
+        lang = language.Language()
+        lang.reload()
+        self.app.__init__()
+
     def _update_screen(self):
         self.screen.fill(self.bg_color)
         for index, surface in enumerate(self.strings_surfaces):
@@ -73,22 +98,6 @@ class MenuScreen:
                 self._check_buttons(mouse_position)
     
     def _check_buttons(self, mouse_position):
-        for index, button in enumerate(self.buttons):
+        for button in self.buttons:
             if button.rect.collidepoint(mouse_position):
-                if index == 0:
-                    self.app.active_screen = self.app.demo_screen
-                elif index == 1:
-                    self.app.active_screen = self.app.theory_screen
-                elif index == 2:
-                    self.app.active_screen = self.app.authors_screen
-                elif index == 3:
-                    quit()
-                elif index == 4:
-                    cfg = config.ConfigLoader()
-                    if cfg['language'] == "rus":
-                        cfg.set("language", "eng")
-                    elif cfg['language'] == "eng":
-                        cfg.set("language", "rus")
-                    lang = language.Language()
-                    lang.reload()
-                    self.app.__init__()
+                button.command()

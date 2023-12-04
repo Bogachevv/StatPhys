@@ -22,9 +22,18 @@ class TheoryScreen():
             self.pictures.append(pygame.transform.scale(pygame.image.load(self.folder + f"theory_page_{i}.png"), (1290, 1010)))
             self.pictures_positions.append(((self.app.monitor.width - 1290) * 0.5, 0))
 
-        self.buttons = [Button(app, "<—", (30, self.app.monitor.height - 80 - 60 ), (100, 80)),
-                        Button(app, lang['btn_menu'], (self.app.monitor.width * 0.5 - 150, self.app.monitor.height - 80 - 60 ), (300, 80)),
-                        Button(app, "—>", (self.app.monitor.width - 100 - 30, self.app.monitor.height - 80 - 60 ), (100, 80))]
+        self.buttons = [Button(app, "<—", (30, self.app.monitor.height - 80 - 60 ), (100, 80), self.last_page),
+                        Button(app, lang['btn_menu'], (self.app.monitor.width * 0.5 - 150, self.app.monitor.height - 80 - 60 ), (300, 80), self.to_menu),
+                        Button(app, "—>", (self.app.monitor.width - 100 - 30, self.app.monitor.height - 80 - 60 ), (100, 80), self.next_page)]
+
+    def to_menu(self):
+        self.app.active_screen = self.app.menu_screen
+
+    def last_page(self):
+        self.page = max(0, self.page - 1)
+
+    def next_page(self):
+        self.page = min(len(self.pictures) - 1, self.page + 1)
 
     def _update_screen(self):
         self.screen.fill(self.bg_color)
@@ -45,11 +54,7 @@ class TheoryScreen():
                 self._check_buttons(mouse_position)
 
     def _check_buttons(self, mouse_position):
-        for index, button in enumerate(self.buttons):
+        for button in self.buttons:
             if button.rect.collidepoint(mouse_position):
-                if index == 0:
-                    self.page = max(0, self.page - 1)
-                elif index == 1:
-                    self.app.active_screen = self.app.menu_screen
-                elif index == 2:
-                    self.page = min(len(self.pictures) - 1, self.page + 1)
+                button.command()
+

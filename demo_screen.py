@@ -21,9 +21,9 @@ class DemoScreen:
         self.middle_font = pygame.font.SysFont(self.font, 40, bold=True)
         self.big_font = pygame.font.SysFont(self.font, 50)
 
-        self.buttons = [Button(app, lang['btn_apply'], (app.monitor.width * 0.05 + 30, app.monitor.width * 0.43 + 60), (250, 80)),
-                        Button(app, lang['btn_mode'], (app.monitor.width * 0.05 + 30 + 290, app.monitor.width * 0.43 + 60), (250, 80)),
-                        Button(app, lang['btn_menu'], (app.monitor.width * 0.05 + 30 + 580, app.monitor.width * 0.43 + 60), (250, 80))]
+        self.buttons = [Button(app, lang['btn_apply'], (app.monitor.width * 0.05 + 30, app.monitor.width * 0.43 + 60), (250, 80), self.apply),
+                        Button(app, lang['btn_mode'], (app.monitor.width * 0.05 + 30 + 290, app.monitor.width * 0.43 + 60), (250, 80), self.modes),
+                        Button(app, lang['btn_menu'], (app.monitor.width * 0.05 + 30 + 580, app.monitor.width * 0.43 + 60), (250, 80), self.to_menu)]
 
         param_names, sliders_gap, param_poses, param_bounds, param_initial, param_step, par4sim, dec_numbers = (
             self._load_params())
@@ -61,6 +61,18 @@ class DemoScreen:
                                len_buf=buf_len, const_legend='kT/(γ+1)', const_func=self.demo.simulation.expected_potential_energy)]
 
         self.slider_grabbed = False
+
+    def apply(self):
+        for fig in self.graphics:
+            fig._refresh_iter(self.demo_config)
+        self.demo._refresh_iter(self.demo_config)
+        self.demo_config['is_changed'] = False
+
+    def modes(self):
+        self.graphics[2:], self.graphics[:2] = self.graphics[:2], self.graphics[2:]
+
+    def to_menu(self):
+        self.app.active_screen = self.app.menu_screen
 
     def _load_params(self):
         loader = config.ConfigLoader()
@@ -121,17 +133,9 @@ class DemoScreen:
                 slider.slider.hovered = False
 
     def _check_buttons(self, mouse_position):
-        for index, button in enumerate(self.buttons):
+        for button in self.buttons:
             if button.rect.collidepoint(mouse_position):
-                if index == 0:
-                    for fig in self.graphics:
-                        fig._refresh_iter(self.demo_config)
-                    self.demo._refresh_iter(self.demo_config)
-                    self.demo_config['is_changed'] = False
-                elif index == 1:
-                    self.graphics[2:], self.graphics[:2] = self.graphics[:2], self.graphics[2:]
-                elif index == 2:
-                    self.app.active_screen = self.app.menu_screen
+                button.command()
 
     def _draw_figures(self):
         for fig in self.graphics:

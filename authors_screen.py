@@ -54,8 +54,11 @@ class AuthorsScreen():
                                    (self.app.monitor.width * 0.1 + 30, self.app.monitor.height * 0.2 + 100),
                                    (self.app.monitor.width * 0.9 - 30 - 400, self.app.monitor.height * 0.2 + 100),
                                    (self.app.monitor.width * 0.5 - 200, self.app.monitor.height * 0.2 + 100)]
-        self.buttons = [Button(app, lang['btn_menu'], (self.app.monitor.width * 0.9 - 30 - 300 , self.app.monitor.height - 80 - 60), (300, 80))]
-    
+        self.buttons = [Button(app, lang['btn_menu'], (self.app.monitor.width * 0.9 - 30 - 300 , self.app.monitor.height - 80 - 60), (300, 80), self.to_menu)]
+
+    def to_menu(self):
+        self.app.active_screen = self.app.menu_screen
+
     def _update_screen(self):
         self.screen.fill(self.bg_color)
         for index, surface in enumerate(self.strings_surfaces):
@@ -77,8 +80,6 @@ class AuthorsScreen():
                 self._check_buttons(mouse_position)
     
     def _check_buttons(self, mouse_position):
-        for index, button in enumerate(self.buttons):
+        for button in self.buttons:
             if button.rect.collidepoint(mouse_position):
-                if index == 0:
-                    self.app.active_screen = self.app.menu_screen
-        
+                button.command()

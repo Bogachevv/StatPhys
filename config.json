@@ -8,7 +8,7 @@
     "particle_mass",
     "simul_speed"
   ],
-  "language": "eng",
+  "language": "rus",
   "language_files": {
     "rus": "languages/ru.json",
     "eng": "languages/eng.json"

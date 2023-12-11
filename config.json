@@ -67,5 +67,5 @@
   "R_mass": 0.0001,
   "FPS": 60,
   "buf_len": 20,
-  "sim_avg_frames_c": 6000
+  "sim_avg_frames_c": null
 }

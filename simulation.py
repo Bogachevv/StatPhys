@@ -82,8 +82,8 @@ class Simulation:
         f = self.motion(dt=0.00001)
         self._frame_no = (self._frame_no + 1) % 5
 
-        self._potential_energy.append(self.calc_potential_energy())
-        self._kinetic_energy.append(self.calc_kinetic_energy())
+        self._potential_energy.append(self.calc_potential_energy(correct=True))
+        self._kinetic_energy.append(self.calc_kinetic_energy(correct=True))
 
         if self._frame_no == 0:
             self._fix_energy()
@@ -334,8 +334,15 @@ class Simulation:
     def expected_kinetic_energy(self) -> float:
         return float(self._k_boltz * self._T_tar)
 
-    def calc_kinetic_energy(self) -> float:
-        return np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
+    def calc_kinetic_energy(self, correct: bool = False) -> float:
+        E = np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
+        if correct:
+            delta = self._k_boltz * (self._T_tar - self.T)
+            # print(f"Delta: {delta:.4f}\tDelta T: {self._T_tar - self.T:.4f}\tE: {E:.4f}")
+        else:
+            delta = 0.0
+
+        return E - delta
 
     def calc_full_kinetic_energy(self):
         E_spring = np.sum((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
@@ -351,11 +358,19 @@ class Simulation:
     def calc_full_energy(self):
         return self.calc_full_kinetic_energy() + 2 * self.calc_potential_energy()
 
-    def calc_potential_energy(self) -> float:
+    def calc_potential_energy(self, correct: bool = False) -> float:
         dr = self.r_spring[:, 0] - self.r_spring[:, 1]
         dr_sc = np.linalg.norm(dr)
         dx_norm = np.abs(dr_sc - self.l_0)
-        return self._k * (dx_norm ** (self._gamma + 1)) / (self._gamma + 1)
+        E = self._k * (dx_norm ** (self._gamma + 1)) / (self._gamma + 1)
+
+        if correct:
+            delta = self._k_boltz * (self._T_tar - self.T) / (self.gamma + 1)
+            # print(f"Delta: {delta:.4f}\tDelta T: {self._T_tar - self.T:.4f}\tE: {E:.4f}")
+        else:
+            delta = 0
+
+        return E - delta
 
     def mean_potential_energy(self, frames_c: Union[int, None] = None) -> float:
         """

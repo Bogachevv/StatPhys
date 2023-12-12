@@ -199,23 +199,31 @@ class Simulation:
         na_idx = np.any(np.all(eq_mat, axis=1), axis=1)
         return arr[~na_idx, :]
 
+    def ic_collide(self, r1, r2, r_min: float, r_max: float, available):
+        # self._available_spring_ids_pairs[np.array([self.get_deltad2_pairs(r1, r2)]) < (2 * self.R_spring) ** 2]
+
+        delta_2d = np.array([self.get_deltad2_pairs(r1, r2)])
+        idx = (delta_2d < r_max ** 2) & (delta_2d > r_min ** 2)
+
+        return available[idx.reshape((-1,))]
+
     def motion(self, dt) -> float:
         if self._available_spring_ids_pairs.shape[0]:
-            ic_spring = self._available_spring_ids_pairs[
-                np.array([self.get_deltad2_pairs(self._r, self._available_spring_ids_pairs)])
-                < (2 * self.R_spring) ** 2]
+            ic_spring = self.ic_collide(self._r, self._available_spring_ids_pairs, 1.75 * self.R_spring, 2 * self.R_spring, self._available_spring_ids_pairs)
         else:
             ic_spring = np.zeros((0, 2), dtype=int)
 
         if self._available_particles_ids_pairs.shape[0]:
-            ic_particles = self._available_particles_ids_pairs[
-                self.get_deltad2_pairs(self._r, self._available_particles_ids_pairs) < (2 * self.R) ** 2]
+            # ic_particles = self._available_particles_ids_pairs[
+            #     self.get_deltad2_pairs(self._r, self._available_particles_ids_pairs) < (2 * self.R) ** 2]
+            ic_particles = self.ic_collide(self._r, self._available_particles_ids_pairs, 1.75 * self.R, 2 * self.R, self._available_particles_ids_pairs)
         else:
             ic_particles = np.zeros((0, 2), dtype=int)
 
         if self._available_spring_particles_ids_paris.shape[0]:
-            ic_spring_particles = self._available_spring_particles_ids_paris[
-                self.get_deltad2_pairs(self._r, self._available_spring_particles_ids_paris) < (self.R + self.R_spring) ** 2]
+            # ic_spring_particles = self._available_spring_particles_ids_paris[
+            #     self.get_deltad2_pairs(self._r, self._available_spring_particles_ids_paris) < (self.R + self.R_spring) ** 2]
+            ic_spring_particles = self.ic_collide(self._r, self._available_spring_particles_ids_paris, 0.875 * (self.R + self.R_spring), self.R + self.R_spring, self._available_spring_particles_ids_paris)
         else:
             ic_spring_particles = np.zeros((0, 2), dtype=int)
 

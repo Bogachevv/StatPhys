@@ -374,7 +374,7 @@ class Simulation:
 
         if correct:
             delta = self._k_boltz * (self._T_tar - self.T) / (self.gamma + 1)
-            # print(f"Delta: {delta:.4f}\tDelta T: {self._T_tar - self.T:.4f}\tE: {E:.4f}")
+            print(f"Delta: {delta:.4f}\tDelta T: {self._T_tar - self.T:.4f}\tE: {E:.4f}")
         else:
             delta = 0
 

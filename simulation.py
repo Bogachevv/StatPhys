@@ -82,8 +82,8 @@ class Simulation:
         f = self.motion(dt=0.00001)
         self._frame_no = (self._frame_no + 1) % 5
 
-        self._potential_energy.append(self.calc_potential_energy())
-        self._kinetic_energy.append(self.calc_kinetic_energy())
+        self._potential_energy.append(self.calc_potential_energy(correct=True))
+        self._kinetic_energy.append(self.calc_kinetic_energy(correct=True))
 
         if self._frame_no == 0:
             self._fix_energy()
@@ -199,23 +199,31 @@ class Simulation:
         na_idx = np.any(np.all(eq_mat, axis=1), axis=1)
         return arr[~na_idx, :]
 
+    def ic_collide(self, r1, r2, r_min: float, r_max: float, available):
+        # self._available_spring_ids_pairs[np.array([self.get_deltad2_pairs(r1, r2)]) < (2 * self.R_spring) ** 2]
+
+        delta_2d = np.array([self.get_deltad2_pairs(r1, r2)])
+        idx = (delta_2d < r_max ** 2) & (delta_2d > r_min ** 2)
+
+        return available[idx.reshape((-1,))]
+
     def motion(self, dt) -> float:
         if self._available_spring_ids_pairs.shape[0]:
-            ic_spring = self._available_spring_ids_pairs[
-                np.array([self.get_deltad2_pairs(self._r, self._available_spring_ids_pairs)])
-                < (2 * self.R_spring) ** 2]
+            ic_spring = self.ic_collide(self._r, self._available_spring_ids_pairs, 1.75 * self.R_spring, 2 * self.R_spring, self._available_spring_ids_pairs)
         else:
             ic_spring = np.zeros((0, 2), dtype=int)
 
         if self._available_particles_ids_pairs.shape[0]:
-            ic_particles = self._available_particles_ids_pairs[
-                self.get_deltad2_pairs(self._r, self._available_particles_ids_pairs) < (2 * self.R) ** 2]
+            # ic_particles = self._available_particles_ids_pairs[
+            #     self.get_deltad2_pairs(self._r, self._available_particles_ids_pairs) < (2 * self.R) ** 2]
+            ic_particles = self.ic_collide(self._r, self._available_particles_ids_pairs, 1.75 * self.R, 2 * self.R, self._available_particles_ids_pairs)
         else:
             ic_particles = np.zeros((0, 2), dtype=int)
 
         if self._available_spring_particles_ids_paris.shape[0]:
-            ic_spring_particles = self._available_spring_particles_ids_paris[
-                self.get_deltad2_pairs(self._r, self._available_spring_particles_ids_paris) < (self.R + self.R_spring) ** 2]
+            # ic_spring_particles = self._available_spring_particles_ids_paris[
+            #     self.get_deltad2_pairs(self._r, self._available_spring_particles_ids_paris) < (self.R + self.R_spring) ** 2]
+            ic_spring_particles = self.ic_collide(self._r, self._available_spring_particles_ids_paris, 0.875 * (self.R + self.R_spring), self.R + self.R_spring, self._available_spring_particles_ids_paris)
         else:
             ic_spring_particles = np.zeros((0, 2), dtype=int)
 
@@ -334,8 +342,15 @@ class Simulation:
     def expected_kinetic_energy(self) -> float:
         return float(self._k_boltz * self._T_tar)
 
-    def calc_kinetic_energy(self) -> float:
-        return np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
+    def calc_kinetic_energy(self, correct: bool = False) -> float:
+        E = np.mean((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
+        if correct:
+            delta = self._k_boltz * (self._T_tar - self.T)
+            # print(f"Delta: {delta:.4f}\tDelta T: {self._T_tar - self.T:.4f}\tE: {E:.4f}")
+        else:
+            delta = 0.0
+
+        return E - delta
 
     def calc_full_kinetic_energy(self):
         E_spring = np.sum((np.linalg.norm(self.v_spring, axis=0) ** 2) * self.m_spring) / 2
@@ -351,11 +366,19 @@ class Simulation:
     def calc_full_energy(self):
         return self.calc_full_kinetic_energy() + 2 * self.calc_potential_energy()
 
-    def calc_potential_energy(self) -> float:
+    def calc_potential_energy(self, correct: bool = False) -> float:
         dr = self.r_spring[:, 0] - self.r_spring[:, 1]
         dr_sc = np.linalg.norm(dr)
         dx_norm = np.abs(dr_sc - self.l_0)
-        return self._k * (dx_norm ** (self._gamma + 1)) / (self._gamma + 1)
+        E = self._k * (dx_norm ** (self._gamma + 1)) / (self._gamma + 1)
+
+        if correct:
+            delta = self._k_boltz * (self._T_tar - self.T) / (self.gamma + 1)
+            print(f"Delta: {delta:.4f}\tDelta T: {self._T_tar - self.T:.4f}\tE: {E:.4f}")
+        else:
+            delta = 0
+
+        return E - delta
 
     def mean_potential_energy(self, frames_c: Union[int, None] = None) -> float:
         """

@@ -33,12 +33,12 @@
       500
     ],
     "molucul_num": [
-      50,
-      250
+      10,
+      200
     ],
     "elast_coeff": [
-      500,
-      1500
+      1000,
+      3000
     ],
     "nonline_coeff": [
       0.1,
@@ -46,7 +46,7 @@
     ],
     "particle_mass": [
       1,
-      15
+      20
     ],
     "simul_speed": [
       1,
@@ -54,10 +54,10 @@
     ]
   },
   "param_initial": {
-    "particle_size": 2.5,
+    "particle_size": 3,
     "temprature": 350,
-    "molucul_num": 150,
-    "elast_coeff": 1000,
+    "molucul_num": 120,
+    "elast_coeff": 2500,
     "nonline_coeff": 1,
     "particle_mass": 10,
     "simul_speed": 1

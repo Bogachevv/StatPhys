@@ -69,7 +69,21 @@ class Chart:
             self.chart.line(self.title, list(range(1, len(self.buf) + 1)), self.buf.main, color=(242,133,0),line_width=3)
             self.chart.draw()
             pygame.draw.rect(self.screen, self.bd_params[0], self.border, self.bd_params[1])
-    
+
+    def get_xlim(self):
+        return self.chart.chart_area.xdata_min, self.chart.chart_area.xdata_max
+
+    def get_ylim(self):
+        return self.chart.chart_area.ydata_min, self.chart.chart_area.ydata_max
+
+    def set_xlim(self, lim):
+        self.chart.xmin = lim[0]
+        self.chart.xmax = lim[1]
+
+    def set_ylim(self, lim):
+        self.chart.ymin = lim[0]
+        self.chart.ymax = lim[1]
+
     def _refresh_iter(self, params):
         if params['is_changed']:
             self.buf.refresh()

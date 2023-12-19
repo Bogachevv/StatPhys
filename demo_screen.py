@@ -62,6 +62,16 @@ class DemoScreen:
 
         self.slider_grabbed = False
 
+        self.charts_mode = True
+
+    def correct_limits(self):
+        if self.charts_mode:
+            self.graphics[0].set_ylim(self.graphics[2].get_ylim())  # mean_kinetic.y_lim = kinetic.y_lim
+            self.graphics[1].set_ylim(self.graphics[3].get_ylim())  # mean_potential.y_lim = potential.y_lim
+        else:
+            self.graphics[2].set_ylim(self.graphics[0].get_ylim())  # mean_kinetic.y_lim = kinetic.y_lim
+            self.graphics[3].set_ylim(self.graphics[1].get_ylim())  # mean_potential.y_lim = potential.y_lim
+
     def apply(self):
         for fig in self.graphics:
             fig._refresh_iter(self.demo_config)
@@ -70,6 +80,7 @@ class DemoScreen:
 
     def modes(self):
         self.graphics[2:], self.graphics[:2] = self.graphics[:2], self.graphics[2:]
+        self.charts_mode = not self.charts_mode
 
     def to_menu(self):
         self.app.active_screen = self.app.menu_screen
@@ -140,6 +151,8 @@ class DemoScreen:
     def _draw_figures(self):
         for fig in self.graphics:
             fig.draw(self.demo_config)
+
+        self.correct_limits()
         # Part of refreshing charts feature.
 #        self.demo_config['is_changed'] = False
 
